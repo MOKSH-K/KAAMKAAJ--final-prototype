@@ -1012,7 +1012,7 @@
             updateAvailabilityStatus(workerTranslations[languageSelect.value]);
         });
         saveServiceAreaButton.addEventListener("click", saveWorkerServiceArea);
-        window.PRONTO_API_BASE_URL = window.PRONTO_API_BASE_URL || "http://127.0.0.1:8000";
+        window.PRONTO_API_BASE_URL = window.PRONTO_API_BASE_URL || window.location.origin;
         logoutButton.addEventListener("click", async () => {
             logoutButton.disabled = true;
             try {
