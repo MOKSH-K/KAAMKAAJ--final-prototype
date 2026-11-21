@@ -245,6 +245,12 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const redirectParam = new URLSearchParams(window.location.search).get("redirect");
+            const roleParam = new URLSearchParams(window.location.search).get("role");
+            if (roleParam === "worker" || (redirectParam && redirectParam.includes("workers_home.html"))) {
+                document.getElementById("worker-tab").checked = true;
+            } else if (roleParam === "user") {
+                document.getElementById("user-tab").checked = true;
+            }
             if (redirectParam) {
                 document.querySelectorAll(".signup-link a").forEach(link => {
                     link.href = `signup.html?redirect=${encodeURIComponent(redirectParam)}`;
@@ -252,9 +258,6 @@
             }
         });
     </script>
-
-</body>
-</html>
 
 <script type="py">
 from pyscript import when
@@ -273,7 +276,7 @@ async def handle_worker_login(event):
     }
     
     response = await pyfetch(
-        "http://127.0.0.1:8000/worker-login",
+        f"{js.window.location.origin}/worker-login",
         method="POST",
         headers={"Content-Type": "application/json"},
         body=json.dumps(payload),
@@ -296,12 +299,12 @@ async def handle_worker_login(event):
             redirect_url = url_params.get("redirect")
             if not redirect_url or redirect_url.strip() == "":
                 redirect_url = "workers_home.html"
-            if redirect_url.startswith(("/", "\\")) or ":" in redirect_url:
+            if redirect_url.startswith("//") or redirect_url.startswith("\\") or ":" in redirect_url or "\\" in redirect_url:
                 redirect_url = "workers_home.html"
             js.window.location.assign(redirect_url)
         else:
             status_box.style.backgroundColor = "#dc3545"
-            status_box.innerText = f"❌ {result.get('message', 'Login failed')}"
+            status_box.innerText = f"❌ {result.get('detail', result.get('message', 'Login failed'))}"
             status_box.style.display = "block"
             js.document.getElementById("w-phone").value = ""
             js.document.getElementById("w-password").value = ""
@@ -317,7 +320,7 @@ async def handle_user_login(event):
     }
     
     response = await pyfetch(
-        "http://127.0.0.1:8000/login",
+        f"{js.window.location.origin}/login",
         method="POST",
         headers={"Content-Type": "application/json"},
         body=json.dumps(payload),
@@ -340,13 +343,16 @@ async def handle_user_login(event):
             redirect_url = url_params.get("redirect")
             if not redirect_url or redirect_url.strip() == "":
                 redirect_url = "home.html"
-            if redirect_url.startswith(("/", "\\")) or ":" in redirect_url:
+            if redirect_url.startswith("//") or redirect_url.startswith("\\") or ":" in redirect_url or "\\" in redirect_url:
                 redirect_url = "home.html"
             js.window.location.assign(redirect_url)
         else:
             status_box.style.backgroundColor = "#dc3545"
-            status_box.innerText = f"❌ {result.get('message', 'Login failed')}"
+            status_box.innerText = f"❌ {result.get('detail', result.get('message', 'Login failed'))}"
             status_box.style.display = "block"
             js.document.getElementById("u-email").value = ""
             js.document.getElementById("u-password").value = ""
 </script>
+
+</body>
+</html>
