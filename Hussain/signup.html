@@ -269,7 +269,14 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const redirectParam = new URLSearchParams(window.location.search).get("redirect");
+            const params = new URLSearchParams(window.location.search);
+            const redirectParam = params.get("redirect");
+            const roleParam = params.get("role");
+            if (roleParam === "user") {
+                document.getElementById("user-tab").checked = true;
+            } else if (roleParam !== "worker") {
+                document.getElementById("worker-tab").checked = true;
+            }
             if (redirectParam) {
                 document.querySelectorAll(".signup-link a").forEach(link => {
                     link.href = `login.html?redirect=${encodeURIComponent(redirectParam)}`;
@@ -277,9 +284,6 @@
             }
         });
     </script>
-
-</body>
-</html>
 
 <script type="py">
 from pyscript import when
@@ -302,7 +306,7 @@ async def handle_worker_signup(event):
     }
     
     response = await pyfetch(
-        "http://127.0.0.1:8000/worker-signup",
+        f"{js.window.location.origin}/worker-signup",
         method="POST",
         headers={"Content-Type": "application/json"},
         body=json.dumps(payload),
@@ -322,13 +326,13 @@ async def handle_worker_signup(event):
             js.document.getElementById("w-reg-password").value = ""
             url_params = js.URLSearchParams.new(js.window.location.search)
             redirect_url = url_params.get("redirect")
-            if redirect_url and (redirect_url.startswith(("/", "\\")) or ":" in redirect_url):
+            if redirect_url and (redirect_url.startswith("//") or redirect_url.startswith("\\") or ":" in redirect_url or "\\" in redirect_url):
                 redirect_url = None
             dest = f"login.html?redirect={js.encodeURIComponent(redirect_url)}" if redirect_url else "login.html"
             js.window.location.assign(dest)
         else:
             status_box.style.backgroundColor = "#dc3545"
-            status_box.innerText = f"❌ {result.get('message', 'Registration failed')}"
+            status_box.innerText = f"❌ {result.get('detail', result.get('message', 'Registration failed'))}"
             status_box.style.display = "block"
             js.document.getElementById("w-fname").value = ""
             js.document.getElementById("w-reg-phone").value = ""
@@ -352,7 +356,7 @@ async def handle_user_signup(event):
     }
     
     response = await pyfetch(
-        "http://127.0.0.1:8000/signup",
+        f"{js.window.location.origin}/signup",
         method="POST",
         headers={"Content-Type": "application/json"},
         body=json.dumps(payload),
@@ -373,13 +377,13 @@ async def handle_user_signup(event):
             js.document.getElementById("u-reg-password").value = ""
             url_params = js.URLSearchParams.new(js.window.location.search)
             redirect_url = url_params.get("redirect")
-            if redirect_url and (redirect_url.startswith(("/", "\\")) or ":" in redirect_url):
+            if redirect_url and (redirect_url.startswith("//") or redirect_url.startswith("\\") or ":" in redirect_url or "\\" in redirect_url):
                 redirect_url = None
             dest = f"login.html?redirect={js.encodeURIComponent(redirect_url)}" if redirect_url else "login.html"
             js.window.location.assign(dest)
         else:
             status_box.style.backgroundColor = "#dc3545"
-            status_box.innerText = f"❌ {result.get('message', 'Registration failed')}"
+            status_box.innerText = f"❌ {result.get('detail', result.get('message', 'Registration failed'))}"
             status_box.style.display = "block"
             js.document.getElementById("u-name").value = ""
             js.document.getElementById("u-reg-email").value = ""
@@ -387,3 +391,6 @@ async def handle_user_signup(event):
             js.document.getElementById("u-address").value = ""
             js.document.getElementById("u-reg-password").value = ""
 </script>
+
+</body>
+</html>
