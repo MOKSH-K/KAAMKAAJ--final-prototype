@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KAAMKAAJ Login</title>
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
         * {
             margin: 0;
@@ -136,6 +134,11 @@
             opacity: 0.9;
         }
 
+        .btn:disabled {
+            cursor: wait;
+            opacity: 0.7;
+        }
+
         .btn-worker { background: #0056b3; }
         .btn-user { background: #28a745; }
 
@@ -193,27 +196,27 @@
             <label for="user-tab" class="toggle-label label-user">User Portal</label>
         </div>
 
-        <div id="status-message"></div>
+        <div id="status-message" role="status" aria-live="polite"></div>
 
         <!-- WORKER LOGIN SECTION -->
         <div id="worker-section" class="form-section">
             <h2>Worker Login</h2>
-            <div>
+            <form id="worker-login-form">
                 <div class="form-group">
                     <label for="w-phone">Worker Phone number / (ಕೆಲಸಗಾರರ ದೂರವಾಣಿ ಸಂಖ್ಯೆ)</label>
-                    <input type="tel" id="w-phone" required placeholder="Enter Phone number">
+                    <input type="tel" id="w-phone" required minlength="7" maxlength="30" autocomplete="tel" placeholder="Enter Phone number">
                 </div>
                 <div class="form-group">
                     <label for="w-password">Password / (ಗುಪ್ತಪದ)</label>
-                    <input type="password" id="w-password" required placeholder="••••••••">
+                    <input type="password" id="w-password" required maxlength="128" autocomplete="current-password" placeholder="••••••••">
                 </div>
-                <button type="button" class="btn btn-worker" id="worker-login-btn">
+                <button type="submit" class="btn btn-worker" id="worker-login-btn">
                     Log In / (ಲಾಗಿನ್)
                 </button>
                 <div class="signup-link">
                     Don't have an account? <a href="signup.html" style="color: #0056b3;">Sign up</a>
                 </div>
-            </div>
+            </form>
         </div>
 
         <!-- USER LOGIN SECTION -->
@@ -222,22 +225,22 @@
                 <h1 style="text-align: center; font-size: 22px; margin-bottom: 10px;">Welcome to <span class="kaamkaaj">KAAMKAAJ</span></h1>
             </div>
             <h2>User Login</h2>
-            <div>
+            <form id="user-login-form">
                 <div class="form-group">
                     <label for="u-email">Email</label>
-                    <input type="email" id="u-email" required placeholder="Enter email">
+                    <input type="email" id="u-email" required maxlength="254" autocomplete="username" placeholder="Enter email">
                 </div>
                 <div class="form-group">
                     <label for="u-password">Password</label>
-                    <input type="password" id="u-password" required placeholder="••••••••">
+                    <input type="password" id="u-password" required maxlength="128" autocomplete="current-password" placeholder="••••••••">
                 </div>
-                <button type="button" class="btn btn-user" id="user-login-btn">
+                <button type="submit" class="btn btn-user" id="user-login-btn">
                     Log In
                 </button>
                 <div class="signup-link">
                     Don't have an account? <a href="signup.html" style="color: #28a745;">Sign up</a>
                 </div>
-            </div>
+            </form>
         </div>
 
     </div>
@@ -259,99 +262,106 @@
         });
     </script>
 
-<script type="py">
-from pyscript import when
-from pyodide.http import pyfetch
-import js
-import json
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const statusBox = document.getElementById("status-message");
+        const isLocalFrontend = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+            && window.location.port !== "8000";
+        const apiBaseUrl = (
+            window.PRONTO_API_BASE_URL ||
+            (isLocalFrontend
+                ? `http://${window.location.hostname}:8000`
+                : window.location.origin)
+        ).replace(/\/+$/, "");
 
-@when("click", "#worker-login-btn")
-async def handle_worker_login(event):
-    phone = js.document.getElementById("w-phone").value.strip()
-    password = js.document.getElementById("w-password").value.strip()
-    
-    payload = {
-        "phone_number": phone,
-        "worker_pass": password
-    }
-    
-    response = await pyfetch(
-        f"{js.window.location.origin}/worker-login",
-        method="POST",
-        headers={"Content-Type": "application/json"},
-        body=json.dumps(payload),
-        credentials="include"
-    )
-    
-    result = await response.json()
-    status_box = js.document.getElementById("status-message")
-    if status_box:
-        if response.status == 200 and result.get("status") == "success":
-            status_box.style.backgroundColor = "#0056b3"
-            status_box.innerText = f"🎉 {result['message']}"
-            status_box.style.display = "block"
-            js.document.getElementById("w-phone").value = ""
-            js.document.getElementById("w-password").value = ""
-            js.window.localStorage.setItem("loggedIn", "true")
-            js.window.localStorage.setItem("userName", result.get("name", ""))
-            js.window.localStorage.setItem("userType", "worker")
-            url_params = js.URLSearchParams.new(js.window.location.search)
-            redirect_url = url_params.get("redirect")
-            if not redirect_url or redirect_url.strip() == "":
-                redirect_url = "workers_home.html"
-            if redirect_url.startswith("//") or redirect_url.startswith("\\") or ":" in redirect_url or "\\" in redirect_url:
-                redirect_url = "workers_home.html"
-            js.window.location.assign(redirect_url)
-        else:
-            status_box.style.backgroundColor = "#dc3545"
-            status_box.innerText = f"❌ {result.get('detail', result.get('message', 'Login failed'))}"
-            status_box.style.display = "block"
-            js.document.getElementById("w-phone").value = ""
-            js.document.getElementById("w-password").value = ""
+        async function submitLogin(event, role) {
+            event.preventDefault();
+            const worker = role === "worker";
+            const phone = document.getElementById("w-phone");
+            const email = document.getElementById("u-email");
+            const password = document.getElementById(worker ? "w-password" : "u-password");
+            const button = document.getElementById(worker ? "worker-login-btn" : "user-login-btn");
+            const payload = worker
+                ? { phone_number: phone.value.trim(), worker_pass: password.value }
+                : { email: email.value.trim(), password: password.value };
 
-@when("click", "#user-login-btn")
-async def handle_user_login(event):
-    email_input = js.document.getElementById("u-email").value.strip()
-    password = js.document.getElementById("u-password").value.strip()
-    
-    payload = {
-        "email": email_input,
-        "password": password
-    }
-    
-    response = await pyfetch(
-        f"{js.window.location.origin}/login",
-        method="POST",
-        headers={"Content-Type": "application/json"},
-        body=json.dumps(payload),
-        credentials="include"
-    )
-    
-    result = await response.json()
-    status_box = js.document.getElementById("status-message")
-    if status_box:
-        if response.status == 200 and result.get("status") == "success":
-            status_box.style.backgroundColor = "#28a745"
-            status_box.innerText = f"🎉 {result['message']}"
-            status_box.style.display = "block"
-            js.document.getElementById("u-email").value = ""
-            js.document.getElementById("u-password").value = ""
-            js.window.localStorage.setItem("loggedIn", "true")
-            js.window.localStorage.setItem("userName", result.get("name", ""))
-            js.window.localStorage.setItem("userType", "user")
-            url_params = js.URLSearchParams.new(js.window.location.search)
-            redirect_url = url_params.get("redirect")
-            if not redirect_url or redirect_url.strip() == "":
-                redirect_url = "home.html"
-            if redirect_url.startswith("//") or redirect_url.startswith("\\") or ":" in redirect_url or "\\" in redirect_url:
-                redirect_url = "home.html"
-            js.window.location.assign(redirect_url)
-        else:
-            status_box.style.backgroundColor = "#dc3545"
-            status_box.innerText = f"❌ {result.get('detail', result.get('message', 'Login failed'))}"
-            status_box.style.display = "block"
-            js.document.getElementById("u-email").value = ""
-            js.document.getElementById("u-password").value = ""
+            statusBox.style.backgroundColor = worker ? "#0056b3" : "#28a745";
+            statusBox.textContent = "Signing in...";
+            statusBox.style.display = "block";
+            button.disabled = true;
+
+            try {
+                const response = await fetch(
+                    `${apiBaseUrl}/${worker ? "worker-login" : "login"}`,
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    }
+                );
+                const responseText = await response.text();
+                let result = null;
+                if (responseText.trim()) {
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch {
+                        throw new Error(`The server returned an invalid response (HTTP ${response.status}).`);
+                    }
+                }
+                if (!response.ok) {
+                    if (response.status === 405) {
+                        throw new Error(
+                            "The API rejected the login request (HTTP 405). Check that the backend is running and PRONTO_API_BASE_URL points to it."
+                        );
+                    }
+                    const detail = result && Array.isArray(result.detail)
+                        ? result.detail.map((error) => error.msg).join(" ")
+                        : result && result.detail;
+                    throw new Error(
+                        detail || (result && result.message) || `Sign-in failed (HTTP ${response.status}).`
+                    );
+                }
+                if (!result || result.status !== "success") {
+                    throw new Error(
+                        (result && (result.detail || result.message)) ||
+                        `The server returned an empty or invalid response (HTTP ${response.status}).`
+                    );
+                }
+
+                localStorage.setItem("loggedIn", "true");
+                localStorage.setItem("userName", result.name || "");
+                localStorage.setItem("userType", role);
+                const params = new URLSearchParams(window.location.search);
+                const requestedRedirect = params.get("redirect");
+                let destination = worker ? "workers_home.html" : "home.html";
+                if (requestedRedirect) {
+                    const parsedRedirect = new URL(requestedRedirect, window.location.href);
+                    if (parsedRedirect.origin === window.location.origin) {
+                        destination = parsedRedirect.href;
+                    }
+                }
+                window.location.assign(destination);
+            } catch (error) {
+                statusBox.style.backgroundColor = "#dc3545";
+                statusBox.textContent = error instanceof TypeError
+                    ? "Could not reach the server. Check your connection and try again."
+                    : error.message || "Sign-in failed. Please try again.";
+                statusBox.style.display = "block";
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        document.getElementById("worker-login-form").addEventListener(
+            "submit",
+            (event) => submitLogin(event, "worker")
+        );
+        document.getElementById("user-login-form").addEventListener(
+            "submit",
+            (event) => submitLogin(event, "user")
+        );
+    });
 </script>
 
 </body>
