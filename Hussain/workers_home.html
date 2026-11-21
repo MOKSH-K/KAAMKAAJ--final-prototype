@@ -1,0 +1,1078 @@
+
+<!DOCTYPE html>
+<html lang="kn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title data-i18n="documentTitle">KaamKaaj | Worker Portal</title>
+
+    <link rel="stylesheet" href="workers_home.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Kannada:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+
+    <header class="navbar">
+
+        <div class="brand">
+            <div class="brand-logo">
+                <span>K</span>
+            </div>
+
+            <div class="brand-name">
+                <h2>Kaam<span>Kaaj</span></h2>
+                <p data-i18n="workerPortal">WORKER PORTAL</p>
+            </div>
+        </div>
+
+        <nav class="nav-links">
+
+            <a href="#" class="active">
+                <i class="fa-solid fa-house"></i>
+                <span data-i18n="dashboard">Dashboard</span>
+            </a>
+
+            <a href="#job-requests">
+                <i class="fa-regular fa-bell"></i>
+                <span data-i18n="notifications">Notifications</span>
+            </a>
+
+        </nav>
+
+        <div class="nav-right">
+
+            <div class="language-selector">
+                <i class="fa-solid fa-globe"></i>
+
+                <select id="language-select" aria-label="Select language"
+                        data-i18n-aria-label="languageLabel">
+                    <option value="kn">ಕನ್ನಡ</option>
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी</option>
+                </select>
+            </div>
+
+            <div class="auth-buttons">
+                <a class="auth-button login-button" href="login.html" data-i18n="login">ಲಾಗಿನ್</a>
+                <a class="auth-button signup-button" href="signup.html" data-i18n="signup">ಸೈನ್ ಅಪ್</a>
+                <button class="auth-button signup-button" id="logout-button" type="button"
+                        data-i18n="logout" hidden>ಲಾಗ್ ಔಟ್</button>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-container">
+
+
+        <!-- HERO SECTION -->
+
+        <section class="hero-section">
+
+            <div class="hero-content">
+
+            <p class="welcome-text" data-i18n="welcome">
+                ನಮಸ್ಕಾರ, ಕಾರ್ಮಿಕರೇ! 👋
+            </p>
+
+            <h1 data-i18n="heroTitle">
+                    ಕೆಲಸಕ್ಕೆ ಸಿದ್ಧರಿದ್ದೀರಾ?
+                </h1>
+
+            <p class="hero-description" data-i18n="heroDescription">
+                    ನಿಮ್ಮ ಕೆಲಸವನ್ನು ಪ್ರಾರಂಭಿಸಿ ಮತ್ತು ಹಣ ಸಂಪಾದಿಸಿ.
+                </p>
+
+
+                <!-- ONLINE STATUS -->
+
+                <div class="online-status">
+
+                    <div class="status-indicator"></div>
+
+                    <div class="status-text">
+                        <h3 data-i18n="online">ಆನ್‌ಲೈನ್</h3>
+
+                        <p data-i18n="onlineDescription">
+                            ನೀವು ಈಗ ಕೆಲಸದ ವಿನಂತಿಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತಿದ್ದೀರಿ
+                        </p>
+                    </div>
+
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked aria-label="Worker availability">
+                        <span class="toggle-slider"></span>
+                    </label>
+
+                </div>
+
+                <div class="worker-area-settings">
+                    <label for="worker-service-area" data-i18n="serviceAreaLabel">
+                        Service area shared with customers
+                    </label>
+                    <p data-i18n="serviceAreaHelp">
+                        This area is shown to a customer after you accept their request.
+                    </p>
+                    <div class="worker-area-controls">
+                        <input id="worker-service-area" type="text" maxlength="250" required>
+                        <button id="save-worker-service-area" type="button" data-i18n="saveServiceArea">
+                            Save area
+                        </button>
+                    </div>
+                    <p id="worker-service-area-status" role="status" aria-live="polite"></p>
+                </div>
+
+            </div>
+
+
+            <!-- WORKER IMAGE -->
+
+            <div class="hero-image">
+
+                <img
+                    src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=85"
+                    alt="KaamKaaj service worker"
+                    data-i18n-alt="workerImageAlt"
+                >
+
+                <div class="image-overlay">
+                    <div class="image-brand">
+                        <div class="mini-logo">K</div>
+                        <span>KaamKaaj</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- STATISTICS CARDS -->
+
+        <section class="stats-container">
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue-icon">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+
+                <div class="stat-details">
+
+                    <p data-i18n="todayEarnings">ಇಂದಿನ ಗಳಿಕೆ</p>
+
+                    <h2 id="today-earnings-value">₹0</h2>
+
+                    <small data-i18n="todayTotal">ಇಂದಿನ ಒಟ್ಟು ಗಳಿಕೆ</small>
+
+                </div>
+
+                <div class="stat-extra green-extra">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                </div>
+
+            </div>
+
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+
+                <div class="stat-details">
+
+                    <p data-i18n="completedJobs">ಪೂರ್ಣಗೊಂಡ ಕೆಲಸಗಳು</p>
+
+                    <h2 id="completed-jobs-count">0</h2>
+
+                    <small data-i18n="completedToday">ಇಂದು ಪೂರ್ಣಗೊಂಡಿವೆ</small>
+                    <small id="completed-jobs-error" class="stat-error" role="status" hidden></small>
+
+                </div>
+
+                <div class="stat-extra">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+
+            </div>
+
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon purple-icon">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+
+                <div class="stat-details">
+
+                    <p data-i18n="totalEarnings">ಒಟ್ಟು ಗಳಿಕೆ</p>
+
+                    <h2>₹0</h2>
+
+                    <small data-i18n="earningsToDate">ಇದುವರೆಗಿನ ಗಳಿಕೆ</small>
+
+                </div>
+
+                <div class="stat-extra">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- DASHBOARD CONTENT -->
+
+        <section class="dashboard-content">
+
+
+            <!-- JOB REQUEST SECTION -->
+
+            <div class="jobs-panel" id="job-requests">
+
+                <div class="panel-header">
+
+                    <div class="panel-title">
+
+                        <div class="header-icon">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </div>
+
+                        <div>
+                            <h2 data-i18n="jobRequests">ಕೆಲಸದ ವಿನಂತಿಗಳು</h2>
+                            <p data-i18n="nearbyJobs">ನಿಮ್ಮ ಹತ್ತಿರದ ಕೆಲಸಗಳು</p>
+                        </div>
+
+                    </div>
+
+                    <div class="live-status">
+                        <span></span>
+                        <span data-i18n="live">ಲೈವ್</span>
+                    </div>
+
+                </div>
+
+
+                <p id="request-status" class="request-status" role="status" aria-live="polite"
+                   data-i18n="loadingRequests">Loading requests...</p>
+
+                <div id="job-request-list" class="job-request-list"></div>
+
+                <template id="job-request-template">
+                    <div class="job-request">
+                        <div class="job-service">
+                            <div class="service-icon">
+                                <i class="fa-solid fa-broom"></i>
+                            </div>
+                            <div class="service-name">
+                                <h3 data-request-services></h3>
+                                <p data-i18n="customerRequest">Customer service request</p>
+                            </div>
+                        </div>
+
+                        <div class="job-details">
+                            <div class="job-detail">
+                                <i class="fa-regular fa-user"></i>
+                                <div>
+                                    <small data-i18n="customer">Customer</small>
+                                    <strong data-request-customer></strong>
+                                </div>
+                            </div>
+                            <div class="job-detail">
+                                <i class="fa-solid fa-house"></i>
+                                <div>
+                                    <small data-i18n="propertyType">Property type</small>
+                                    <strong data-request-property-type></strong>
+                                </div>
+                            </div>
+                            <div class="job-detail">
+                                <i class="fa-solid fa-phone"></i>
+                                <div>
+                                    <small data-i18n="customerPhone">Customer phone</small>
+                                    <a data-request-customer-phone></a>
+                                </div>
+                            </div>
+                            <div class="job-detail">
+                                <i class="fa-solid fa-envelope"></i>
+                                <div>
+                                    <small data-i18n="customerEmail">Customer email</small>
+                                    <a data-request-customer-email></a>
+                                </div>
+                            </div>
+                            <div class="job-detail">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <div>
+                                    <small data-i18n="customerAddress">Service address</small>
+                                    <strong data-request-customer-address></strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="job-payment">
+                            <div class="request-timer" data-i18n="newRequest">New request</div>
+                            <h2 data-request-reference></h2>
+                            <span data-i18n="bookingReference">Booking</span>
+                        </div>
+
+                        <div class="job-actions">
+                            <button class="accept-button" type="button" data-i18n="accept">Accept</button>
+                        </div>
+                    </div>
+                </template>
+
+            </div>
+
+
+
+            <!-- RECENT ACTIVITY -->
+
+            <div class="activity-panel">
+
+                <div class="activity-header">
+
+                    <div class="activity-heading">
+
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+
+                        <h2 data-i18n="recentActivity">ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ</h2>
+
+                    </div>
+
+                </div>
+
+                <p id="recent-activity-status" role="status" data-i18n="activityLoading">
+                    Loading recent activity...
+                </p>
+                <div id="recent-activity-list" class="recent-activity-list" aria-live="polite"></div>
+
+                <template id="recent-activity-template">
+                    <div class="activity-item">
+                        <div class="activity-icon cleaning">
+                            <i class="fa-solid fa-broom"></i>
+                        </div>
+                        <div class="activity-info">
+                            <h4 data-activity-services></h4>
+                            <p>
+                                <span data-activity-customer></span>
+                                •
+                                <time data-activity-date></time>
+                            </p>
+                        </div>
+                        <span class="activity-reference" data-activity-reference></span>
+                    </div>
+                </template>
+            </div>
+
+
+        </section>
+
+
+
+        <!-- FOOTER -->
+
+        <footer>
+
+            © 2026 KaamKaaj.
+            <span data-i18n="footerTagline">ನಿಮ್ಮ ಕೆಲಸ, ನಿಮ್ಮ ಆದಾಯ.</span>
+
+        </footer>
+
+
+    </main>
+
+    <script>
+        const workerTranslations = {
+            en: {
+                documentTitle: "KaamKaaj | Worker Portal",
+                workerFallback: "Worker",
+                profileError: "Could not load your worker profile. Please refresh the page.",
+                languageLabel: "Select language",
+                workerPortal: "WORKER PORTAL",
+                dashboard: "Dashboard",
+                notifications: "Notifications",
+                login: "Login",
+                signup: "Sign Up",
+                logout: "Log Out",
+                logoutFailed: "Could not log you out. Please try again.",
+                welcome: "Hello, {name}! 👋",
+                heroTitle: "Ready to get to work?",
+                heroDescription: "Start your jobs and earn money.",
+                online: "Online",
+                onlineDescription: "You are currently receiving job requests.",
+                offline: "Offline",
+                offlineDescription: "Your status is set to offline.",
+                availabilityOnlineAria: "Worker availability: online",
+                availabilityOfflineAria: "Worker availability: offline",
+                serviceAreaLabel: "Service area shared with customers",
+                serviceAreaHelp: "This area is shown to a customer after you accept their request.",
+                saveServiceArea: "Save area",
+                serviceAreaSaved: "Service area saved.",
+                serviceAreaRequired: "Enter your service area.",
+                serviceAreaSaveFailed: "Could not save your service area. Please try again.",
+                workerImageAlt: "KaamKaaj service worker",
+                todayEarnings: "Today's earnings",
+                todayTotal: "Today's total earnings",
+                completedJobs: "Jobs completed",
+                completedToday: "Completed today",
+                totalEarnings: "Total earnings",
+                earningsToDate: "Earnings to date",
+                jobRequests: "Job requests",
+                nearbyJobs: "Jobs near you",
+                live: "Live",
+                customerRequest: "Customer service request",
+                customer: "Customer",
+                location: "Location",
+                distance: "Distance",
+                propertyType: "Property type",
+                customerPhone: "Customer phone",
+                customerEmail: "Customer email",
+                customerAddress: "Service address",
+                notProvided: "Not provided",
+                newRequest: "New request",
+                bookingReference: "Booking",
+                loadingRequests: "Loading requests...",
+                noPendingRequests: "No pending requests right now.",
+                requestsLoadFailed: "Could not load requests. Please refresh the page.",
+                acceptFailed: "Could not accept this request. Please try again.",
+                bookingAccepted: "Request accepted.",
+                statsLoadFailed: "Could not load today's completed jobs.",
+                serviceNames: {
+                    sweeping: "Sweeping",
+                    mopping: "Mopping",
+                    washing_vessels: "Washing vessels",
+                    laundry: "Laundry",
+                    dusting: "Dusting",
+                    balcony_cleaning: "Balcony cleaning",
+                    ironing_and_folding: "Ironing and folding",
+                    kitchen_prep: "Kitchen preparation"
+                },
+                cashPayment: "Cash payment",
+                requestTimer: "15s",
+                reject: "Reject",
+                accept: "Accept",
+                recentActivity: "Recent activity",
+                activityLoading: "Loading recent activity...",
+                activityEmpty: "No accepted bookings yet.",
+                activityLoadFailed: "Could not load recent activity. Please refresh the page.",
+                footerTagline: "Your work, your income."
+            },
+            kn: {
+                documentTitle: "ಕಾಮ್‌ಕಾಜ್ | ಕಾರ್ಮಿಕರ ಪೋರ್ಟಲ್",
+                workerFallback: "ಕಾರ್ಮಿಕರೇ",
+                profileError: "ನಿಮ್ಮ ಕಾರ್ಮಿಕರ ಪ್ರೊಫೈಲ್ ಲೋಡ್ ಆಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಪುಟವನ್ನು ಮರುಲೋಡ್ ಮಾಡಿ.",
+                languageLabel: "ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+                workerPortal: "ಕಾರ್ಮಿಕರ ಪೋರ್ಟಲ್",
+                dashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+                notifications: "ಅಧಿಸೂಚನೆಗಳು",
+                login: "ಲಾಗಿನ್",
+                signup: "ಸೈನ್ ಅಪ್",
+                logout: "ಲಾಗ್ ಔಟ್",
+                logoutFailed: "ಲಾಗ್ ಔಟ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+                welcome: "ನಮಸ್ಕಾರ, {name}! 👋",
+                heroTitle: "ಕೆಲಸಕ್ಕೆ ಸಿದ್ಧರಿದ್ದೀರಾ?",
+                heroDescription: "ನಿಮ್ಮ ಕೆಲಸವನ್ನು ಪ್ರಾರಂಭಿಸಿ ಮತ್ತು ಹಣ ಸಂಪಾದಿಸಿ.",
+                online: "ಆನ್‌ಲೈನ್",
+                onlineDescription: "ನೀವು ಈಗ ಕೆಲಸದ ವಿನಂತಿಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತಿದ್ದೀರಿ.",
+                offline: "ಆಫ್‌ಲೈನ್",
+                offlineDescription: "ನಿಮ್ಮ ಸ್ಥಿತಿಯನ್ನು ಆಫ್‌ಲೈನ್ ಎಂದು ಹೊಂದಿಸಲಾಗಿದೆ.",
+                availabilityOnlineAria: "ಕಾರ್ಮಿಕರ ಲಭ್ಯತೆ: ಆನ್‌ಲೈನ್",
+                availabilityOfflineAria: "ಕಾರ್ಮಿಕರ ಲಭ್ಯತೆ: ಆಫ್‌ಲೈನ್",
+                serviceAreaLabel: "ಗ್ರಾಹಕರೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳುವ ಸೇವಾ ಪ್ರದೇಶ",
+                serviceAreaHelp: "ನೀವು ವಿನಂತಿಯನ್ನು ಸ್ವೀಕರಿಸಿದ ನಂತರ ಈ ಪ್ರದೇಶವನ್ನು ಗ್ರಾಹಕರಿಗೆ ತೋರಿಸಲಾಗುತ್ತದೆ.",
+                saveServiceArea: "ಪ್ರದೇಶವನ್ನು ಉಳಿಸಿ",
+                serviceAreaSaved: "ಸೇವಾ ಪ್ರದೇಶವನ್ನು ಉಳಿಸಲಾಗಿದೆ.",
+                serviceAreaRequired: "ನಿಮ್ಮ ಸೇವಾ ಪ್ರದೇಶವನ್ನು ನಮೂದಿಸಿ.",
+                serviceAreaSaveFailed: "ಸೇವಾ ಪ್ರದೇಶವನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+                workerImageAlt: "ಕಾಮ್‌ಕಾಜ್ ಸೇವಾ ಕಾರ್ಮಿಕ",
+                todayEarnings: "ಇಂದಿನ ಗಳಿಕೆ",
+                todayTotal: "ಇಂದಿನ ಒಟ್ಟು ಗಳಿಕೆ",
+                completedJobs: "ಪೂರ್ಣಗೊಂಡ ಕೆಲಸಗಳು",
+                completedToday: "ಇಂದು ಪೂರ್ಣಗೊಂಡಿವೆ",
+                totalEarnings: "ಒಟ್ಟು ಗಳಿಕೆ",
+                earningsToDate: "ಇದುವರೆಗಿನ ಗಳಿಕೆ",
+                jobRequests: "ಕೆಲಸದ ವಿನಂತಿಗಳು",
+                nearbyJobs: "ನಿಮ್ಮ ಹತ್ತಿರದ ಕೆಲಸಗಳು",
+                live: "ಲೈವ್",
+                customerRequest: "ಗ್ರಾಹಕರ ಕೆಲಸದ ವಿನಂತಿ",
+                customer: "ಗ್ರಾಹಕರು",
+                location: "ಸ್ಥಳ",
+                distance: "ದೂರ",
+                propertyType: "ಆಸ್ತಿಯ ಪ್ರಕಾರ",
+                customerPhone: "ಗ್ರಾಹಕರ ದೂರವಾಣಿ",
+                customerEmail: "ಗ್ರಾಹಕರ ಇಮೇಲ್",
+                customerAddress: "ಸೇವಾ ವಿಳಾಸ",
+                notProvided: "ಒದಗಿಸಿಲ್ಲ",
+                newRequest: "ಹೊಸ ವಿನಂತಿ",
+                bookingReference: "ಬುಕಿಂಗ್",
+                loadingRequests: "ವಿನಂತಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
+                noPendingRequests: "ಈಗ ಯಾವುದೇ ಬಾಕಿ ವಿನಂತಿಗಳಿಲ್ಲ.",
+                requestsLoadFailed: "ವಿನಂತಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಪುಟವನ್ನು ಮರುಲೋಡ್ ಮಾಡಿ.",
+                acceptFailed: "ಈ ವಿನಂತಿಯನ್ನು ಸ್ವೀಕರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+                bookingAccepted: "ವಿನಂತಿಯನ್ನು ಸ್ವೀಕರಿಸಲಾಗಿದೆ.",
+                statsLoadFailed: "ಇಂದಿನ ಪೂರ್ಣಗೊಂಡ ಕೆಲಸಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
+                serviceNames: {
+                    sweeping: "ಗುಡಿಸುವುದು",
+                    mopping: "ನೆಲ ಒರೆಸುವುದು",
+                    washing_vessels: "ಪಾತ್ರೆ ತೊಳೆಯುವುದು",
+                    laundry: "ಬಟ್ಟೆ ಒಗೆಯುವುದು",
+                    dusting: "ಧೂಳು ತೆಗೆಯುವುದು",
+                    balcony_cleaning: "ಬಾಲ್ಕನಿ ಸ್ವಚ್ಛಗೊಳಿಸುವುದು",
+                    ironing_and_folding: "ಇಸ್ತ್ರಿ ಮತ್ತು ಮಡಿಸುವುದು",
+                    kitchen_prep: "ಅಡುಗೆ ತಯಾರಿ"
+                },
+                cashPayment: "ನಗದು ಪಾವತಿ",
+                requestTimer: "15 ಸೆಕೆಂಡುಗಳು",
+                reject: "ತಿರಸ್ಕರಿಸಿ",
+                accept: "ಸ್ವೀಕರಿಸಿ",
+                recentActivity: "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ",
+                activityLoading: "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆಯನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
+                activityEmpty: "ಇನ್ನೂ ಯಾವುದೇ ಬುಕಿಂಗ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಿಲ್ಲ.",
+                activityLoadFailed: "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಪುಟವನ್ನು ಮರುಲೋಡ್ ಮಾಡಿ.",
+                footerTagline: "ನಿಮ್ಮ ಕೆಲಸ, ನಿಮ್ಮ ಆದಾಯ."
+            },
+            hi: {
+                documentTitle: "कामकाज | कर्मचारी पोर्टल",
+                workerFallback: "कर्मचारी",
+                profileError: "आपकी कर्मचारी प्रोफ़ाइल लोड नहीं हो सकी। कृपया पेज रीफ़्रेश करें।",
+                languageLabel: "भाषा चुनें",
+                workerPortal: "कर्मचारी पोर्टल",
+                dashboard: "डैशबोर्ड",
+                notifications: "सूचनाएँ",
+                login: "लॉग इन",
+                signup: "साइन अप",
+                logout: "लॉग आउट",
+                logoutFailed: "लॉग आउट नहीं हो सका। कृपया फिर से कोशिश करें।",
+                welcome: "नमस्ते, {name}! 👋",
+                heroTitle: "काम शुरू करने के लिए तैयार हैं?",
+                heroDescription: "अपना काम शुरू करें और पैसे कमाएँ।",
+                online: "ऑनलाइन",
+                onlineDescription: "आपको अभी काम के अनुरोध मिल रहे हैं।",
+                offline: "ऑफ़लाइन",
+                offlineDescription: "आपकी स्थिति ऑफ़लाइन पर सेट है।",
+                availabilityOnlineAria: "कर्मचारी की उपलब्धता: ऑनलाइन",
+                availabilityOfflineAria: "कर्मचारी की उपलब्धता: ऑफ़लाइन",
+                serviceAreaLabel: "ग्राहकों के साथ साझा किया जाने वाला सेवा क्षेत्र",
+                serviceAreaHelp: "आपके अनुरोध स्वीकार करने के बाद यह क्षेत्र ग्राहक को दिखेगा।",
+                saveServiceArea: "क्षेत्र सहेजें",
+                serviceAreaSaved: "सेवा क्षेत्र सहेज लिया गया।",
+                serviceAreaRequired: "अपना सेवा क्षेत्र दर्ज करें।",
+                serviceAreaSaveFailed: "सेवा क्षेत्र सहेजा नहीं जा सका। कृपया फिर से कोशिश करें।",
+                workerImageAlt: "कामकाज सेवा कर्मचारी",
+                todayEarnings: "आज की कमाई",
+                todayTotal: "आज की कुल कमाई",
+                completedJobs: "पूरे किए गए काम",
+                completedToday: "आज पूरे किए गए",
+                totalEarnings: "कुल कमाई",
+                earningsToDate: "अब तक की कमाई",
+                jobRequests: "काम के अनुरोध",
+                nearbyJobs: "आपके आस-पास के काम",
+                live: "लाइव",
+                customerRequest: "ग्राहक की सेवा का अनुरोध",
+                customer: "ग्राहक",
+                location: "स्थान",
+                distance: "दूरी",
+                propertyType: "प्रॉपर्टी का प्रकार",
+                customerPhone: "ग्राहक का फ़ोन",
+                customerEmail: "ग्राहक का ईमेल",
+                customerAddress: "सेवा का पता",
+                notProvided: "उपलब्ध नहीं",
+                newRequest: "नया अनुरोध",
+                bookingReference: "बुकिंग",
+                loadingRequests: "अनुरोध लोड हो रहे हैं...",
+                noPendingRequests: "अभी कोई लंबित अनुरोध नहीं है।",
+                requestsLoadFailed: "अनुरोध लोड नहीं हो सके। कृपया पेज रीफ़्रेश करें।",
+                acceptFailed: "यह अनुरोध स्वीकार नहीं हो सका। कृपया फिर से कोशिश करें।",
+                bookingAccepted: "अनुरोध स्वीकार कर लिया गया।",
+                statsLoadFailed: "आज पूरे हुए काम लोड नहीं हो सके।",
+                serviceNames: {
+                    sweeping: "झाड़ू लगाना",
+                    mopping: "पोछा लगाना",
+                    washing_vessels: "बर्तन धोना",
+                    laundry: "कपड़े धोना",
+                    dusting: "धूल साफ़ करना",
+                    balcony_cleaning: "बालकनी की सफ़ाई",
+                    ironing_and_folding: "इस्त्री और तह करना",
+                    kitchen_prep: "रसोई की तैयारी"
+                },
+                cashPayment: "नकद भुगतान",
+                requestTimer: "15 सेकंड",
+                reject: "अस्वीकार करें",
+                accept: "स्वीकार करें",
+                recentActivity: "हाल की गतिविधि",
+                activityLoading: "हाल की गतिविधि लोड हो रही है...",
+                activityEmpty: "अभी तक कोई बुकिंग स्वीकार नहीं हुई है।",
+                activityLoadFailed: "हाल की गतिविधि लोड नहीं हो सकी। कृपया पेज रीफ़्रेश करें।",
+                footerTagline: "आपका काम, आपकी कमाई।"
+            }
+        };
+
+        const languageSelect = document.getElementById("language-select");
+        const loginLink = document.querySelector(".auth-buttons .login-button");
+        const signupLink = document.querySelector(".auth-buttons .signup-button:not(#logout-button)");
+        const logoutButton = document.getElementById("logout-button");
+        const todayEarningsValue = document.getElementById("today-earnings-value");
+        const completedJobsCount = document.getElementById("completed-jobs-count");
+        const completedJobsError = document.getElementById("completed-jobs-error");
+        const requestList = document.getElementById("job-request-list");
+        const requestTemplate = document.getElementById("job-request-template");
+        const requestStatus = document.getElementById("request-status");
+        const activityList = document.getElementById("recent-activity-list");
+        const activityTemplate = document.getElementById("recent-activity-template");
+        const activityStatus = document.getElementById("recent-activity-status");
+        const availabilityCard = document.querySelector(".online-status");
+        const liveStatus = document.querySelector(".live-status");
+        const availabilityToggle = availabilityCard.querySelector(".toggle-switch input");
+        const availabilityTitle = availabilityCard.querySelector(".status-text h3");
+        const availabilityDescription = availabilityCard.querySelector(".status-text p");
+        const workerServiceAreaInput = document.getElementById("worker-service-area");
+        const saveServiceAreaButton = document.getElementById("save-worker-service-area");
+        const serviceAreaStatus = document.getElementById("worker-service-area-status");
+        let workerName = "";
+        let workerCsrfToken = "";
+        let workerProfileError = false;
+        let pendingRequests = [];
+        let pendingRequestsLoaded = false;
+        let pendingRequestsPromise = null;
+        let recentActivities = [];
+        let recentActivitiesLoaded = false;
+        let recentActivitiesFailed = false;
+        let acceptingRequest = false;
+        let earningsDateKey = getLocalDateKey(new Date());
+        let earningsResetTimer;
+
+        function getLocalDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        }
+
+        function resetTodayEarnings() {
+            todayEarningsValue.textContent = "₹0";
+            earningsDateKey = getLocalDateKey(new Date());
+        }
+
+        function scheduleTodayEarningsReset() {
+            clearTimeout(earningsResetTimer);
+            const now = new Date();
+            const nextMidnight = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate() + 1
+            );
+            earningsResetTimer = setTimeout(() => {
+                resetTodayEarnings();
+                scheduleTodayEarningsReset();
+            }, nextMidnight.getTime() - now.getTime());
+        }
+
+        function checkTodayEarningsReset() {
+            const today = getLocalDateKey(new Date());
+            if (today !== earningsDateKey) resetTodayEarnings();
+            scheduleTodayEarningsReset();
+        }
+
+        todayEarningsValue.textContent = "₹0";
+        scheduleTodayEarningsReset();
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden) checkTodayEarningsReset();
+        });
+
+        function showRequestStatus(messageKey) {
+            const dictionary = workerTranslations[languageSelect.value];
+            requestStatus.dataset.i18n = messageKey;
+            requestStatus.textContent = dictionary[messageKey];
+            requestStatus.hidden = false;
+        }
+
+        function formatRequestValue(value) {
+            return String(value || "")
+                .replaceAll("_", " ")
+                .replace(/\b[a-z]/g, (letter) => letter.toUpperCase())
+                .replace(/\b(\d+) Bhk\b/i, "$1 BHK");
+        }
+
+        function renderPendingRequests() {
+            const dictionary = workerTranslations[languageSelect.value];
+            requestList.replaceChildren();
+            if (pendingRequests.length === 0) {
+                showRequestStatus(
+                    pendingRequestsLoaded ? "noPendingRequests" : "loadingRequests"
+                );
+                return;
+            }
+
+            requestStatus.hidden = true;
+            pendingRequests.forEach((request) => {
+                const card = requestTemplate.content.firstElementChild.cloneNode(true);
+                card.querySelector("[data-request-services]").textContent = request.services
+                    .map((service) => dictionary.serviceNames[service] || formatRequestValue(service))
+                    .join(", ");
+                card.querySelector("[data-request-customer]").textContent = request.customer_name;
+                card.querySelector("[data-request-property-type]").textContent =
+                    formatRequestValue(request.property_type);
+                card.querySelector("[data-request-reference]").textContent = `#${request.id}`;
+                const customerPhone = card.querySelector("[data-request-customer-phone]");
+                customerPhone.textContent = request.customer_phone || dictionary.notProvided;
+                if (request.customer_phone) {
+                    customerPhone.href =
+                        `tel:${request.customer_phone.replace(/[^\d+]/g, "")}`;
+                }
+                const customerEmail = card.querySelector("[data-request-customer-email]");
+                customerEmail.textContent = request.customer_email || dictionary.notProvided;
+                if (request.customer_email) {
+                    customerEmail.href = `mailto:${request.customer_email}`;
+                }
+                card.querySelector("[data-request-customer-address]").textContent =
+                    request.customer_address || dictionary.notProvided;
+                card.querySelectorAll("[data-i18n]").forEach((element) => {
+                    element.textContent = dictionary[element.dataset.i18n];
+                });
+                const acceptButton = card.querySelector(".accept-button");
+                acceptButton.disabled = acceptingRequest;
+                acceptButton.addEventListener("click", () => acceptPendingRequest(request.id));
+                requestList.append(card);
+            });
+        }
+
+        function renderRecentActivities() {
+            const dictionary = workerTranslations[languageSelect.value];
+            activityList.replaceChildren();
+            if (!recentActivitiesLoaded) {
+                activityStatus.dataset.i18n = "activityLoading";
+                activityStatus.textContent = dictionary.activityLoading;
+                activityStatus.hidden = false;
+                return;
+            }
+            if (recentActivitiesFailed) {
+                activityStatus.dataset.i18n = "activityLoadFailed";
+                activityStatus.textContent = dictionary.activityLoadFailed;
+                activityStatus.hidden = false;
+                return;
+            }
+            if (recentActivities.length === 0) {
+                activityStatus.dataset.i18n = "activityEmpty";
+                activityStatus.textContent = dictionary.activityEmpty;
+                activityStatus.hidden = false;
+                return;
+            }
+
+            activityStatus.hidden = true;
+            const locales = { en: "en-IN", kn: "kn-IN", hi: "hi-IN" };
+            recentActivities.forEach((activity) => {
+                const item = activityTemplate.content.firstElementChild.cloneNode(true);
+                item.querySelector("[data-activity-services]").textContent =
+                    activity.services
+                        .map((service) => dictionary.serviceNames[service] || formatRequestValue(service))
+                        .join(", ");
+                item.querySelector("[data-activity-customer]").textContent =
+                    activity.customer_name || dictionary.notProvided;
+                const acceptedAt = new Date(activity.accepted_at);
+                const acceptedAtElement = item.querySelector("[data-activity-date]");
+                acceptedAtElement.dateTime = activity.accepted_at;
+                acceptedAtElement.textContent = Number.isNaN(acceptedAt.getTime())
+                    ? activity.accepted_at
+                    : acceptedAt.toLocaleString(locales[languageSelect.value], {
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                    });
+                item.querySelector("[data-activity-reference]").textContent =
+                    `#${activity.id}`;
+                activityList.append(item);
+            });
+        }
+
+        async function loadRecentActivities() {
+            try {
+                const response = await fetch(
+                    `${window.PRONTO_API_BASE_URL}/worker/activity`,
+                    { credentials: "include" }
+                );
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.detail || "Could not load worker activity.");
+                }
+                if (!Array.isArray(result.activities)) {
+                    throw new Error("The worker activity response was invalid.");
+                }
+                recentActivities = result.activities;
+                recentActivitiesFailed = false;
+            } catch (error) {
+                console.error("Could not load recent worker activity:", error);
+                recentActivities = [];
+                recentActivitiesFailed = true;
+            } finally {
+                recentActivitiesLoaded = true;
+                renderRecentActivities();
+            }
+        }
+
+        async function loadPendingRequests(forceRefresh = false) {
+            if (!workerCsrfToken || acceptingRequest) return;
+            if (pendingRequestsPromise) {
+                if (!forceRefresh) return pendingRequestsPromise;
+                await pendingRequestsPromise;
+                if (acceptingRequest) return;
+            }
+
+            const currentLoad = (async () => {
+                try {
+                    const response = await fetch(
+                        `${window.PRONTO_API_BASE_URL}/worker/service-requests`,
+                        { credentials: "include" }
+                    );
+                    const result = await response.json();
+                    if (!response.ok) {
+                        throw new Error(result.detail || "Could not load worker requests.");
+                    }
+                    pendingRequests = result.requests;
+                    pendingRequestsLoaded = true;
+                    renderPendingRequests();
+                } catch (error) {
+                    console.error("Could not load worker requests:", error);
+                    pendingRequests = [];
+                    requestList.replaceChildren();
+                    showRequestStatus("requestsLoadFailed");
+                }
+            })();
+            pendingRequestsPromise = currentLoad;
+            try {
+                await currentLoad;
+            } finally {
+                if (pendingRequestsPromise === currentLoad) pendingRequestsPromise = null;
+            }
+        }
+
+        async function loadCompletedJobsCount() {
+            const now = new Date();
+            const query = new URLSearchParams({
+                local_date: getLocalDateKey(now),
+                timezone_offset_minutes: String(now.getTimezoneOffset())
+            });
+            try {
+                const response = await fetch(
+                    `${window.PRONTO_API_BASE_URL}/worker/stats?${query}`,
+                    { credentials: "include" }
+                );
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.detail || "Could not load worker statistics.");
+                }
+                completedJobsCount.textContent = String(result.completed_jobs_today);
+                completedJobsError.hidden = true;
+            } catch (error) {
+                console.error("Could not load today's completed jobs:", error);
+                completedJobsError.dataset.i18n = "statsLoadFailed";
+                completedJobsError.textContent =
+                    workerTranslations[languageSelect.value].statsLoadFailed;
+                completedJobsError.hidden = false;
+            }
+        }
+
+        async function saveWorkerServiceArea() {
+            const serviceArea = workerServiceAreaInput.value.trim();
+            const dictionary = workerTranslations[languageSelect.value];
+            if (!serviceArea) {
+                serviceAreaStatus.dataset.i18n = "serviceAreaRequired";
+                serviceAreaStatus.textContent = dictionary.serviceAreaRequired;
+                return;
+            }
+
+            saveServiceAreaButton.disabled = true;
+            try {
+                const response = await fetch(
+                    `${window.PRONTO_API_BASE_URL}/worker/service-area`,
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-Token": workerCsrfToken
+                        },
+                        body: JSON.stringify({ service_area: serviceArea })
+                    }
+                );
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.detail || "Could not save your service area.");
+                }
+                serviceAreaStatus.dataset.i18n = "serviceAreaSaved";
+                serviceAreaStatus.textContent = dictionary.serviceAreaSaved;
+            } catch (error) {
+                console.error("Could not save the worker service area:", error);
+                serviceAreaStatus.dataset.i18n = "serviceAreaSaveFailed";
+                serviceAreaStatus.textContent = dictionary.serviceAreaSaveFailed;
+            } finally {
+                saveServiceAreaButton.disabled = false;
+            }
+        }
+
+        async function acceptPendingRequest(requestId) {
+            if (!requestId || acceptingRequest) return;
+
+            acceptingRequest = true;
+            requestList.querySelectorAll(".accept-button").forEach((button) => {
+                button.disabled = true;
+            });
+            try {
+                const response = await fetch(
+                    `${window.PRONTO_API_BASE_URL}/worker/service-requests/${encodeURIComponent(requestId)}/accept`,
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "X-CSRF-Token": workerCsrfToken }
+                    }
+                );
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.detail || "Could not accept this request.");
+                }
+
+                completedJobsCount.textContent = String(
+                    Number(completedJobsCount.textContent) + 1
+                );
+                await loadCompletedJobsCount();
+                await loadRecentActivities();
+                showRequestStatus("bookingAccepted");
+            } catch (error) {
+                console.error("Could not accept the worker request:", error);
+                showRequestStatus("acceptFailed");
+            } finally {
+                acceptingRequest = false;
+                await loadPendingRequests(true);
+            }
+        }
+
+        function updateAvailabilityStatus(dictionary) {
+            const isOnline = availabilityToggle.checked;
+            availabilityCard.classList.toggle("is-offline", !isOnline);
+            liveStatus.classList.toggle("is-offline", !isOnline);
+            availabilityTitle.textContent = dictionary[isOnline ? "online" : "offline"];
+            availabilityDescription.textContent =
+                dictionary[isOnline ? "onlineDescription" : "offlineDescription"];
+            availabilityToggle.setAttribute(
+                "aria-label",
+                dictionary[isOnline ? "availabilityOnlineAria" : "availabilityOfflineAria"]
+            );
+        }
+
+        function applyWorkerLanguage(language) {
+            const selectedLanguage = workerTranslations[language] ? language : "kn";
+            const dictionary = workerTranslations[selectedLanguage];
+            document.documentElement.lang = selectedLanguage;
+            document.title = dictionary.documentTitle;
+            document.querySelectorAll("[data-i18n]").forEach((element) => {
+                let translation = dictionary[element.dataset.i18n];
+                if (element.dataset.i18n === "welcome" && translation) {
+                    translation = workerProfileError
+                        ? dictionary.profileError
+                        : translation.replace("{name}", workerName || dictionary.workerFallback);
+                }
+                if (translation) element.textContent = translation;
+            });
+            document.querySelectorAll("[data-i18n-alt]").forEach((element) => {
+                const translation = dictionary[element.dataset.i18nAlt];
+                if (translation) element.alt = translation;
+            });
+            document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+                const translation = dictionary[element.dataset.i18nAriaLabel];
+                if (translation) element.setAttribute("aria-label", translation);
+            });
+            updateAvailabilityStatus(dictionary);
+        }
+
+        const savedLanguage = localStorage.getItem("kaamkaaj-worker-language") || "kn";
+        languageSelect.value = workerTranslations[savedLanguage] ? savedLanguage : "kn";
+        applyWorkerLanguage(languageSelect.value);
+        languageSelect.addEventListener("change", () => {
+            localStorage.setItem("kaamkaaj-worker-language", languageSelect.value);
+            applyWorkerLanguage(languageSelect.value);
+            if (pendingRequestsLoaded) renderPendingRequests();
+            if (recentActivitiesLoaded) renderRecentActivities();
+        });
+        availabilityToggle.addEventListener("change", () => {
+            updateAvailabilityStatus(workerTranslations[languageSelect.value]);
+        });
+        saveServiceAreaButton.addEventListener("click", saveWorkerServiceArea);
+        window.PRONTO_API_BASE_URL = window.PRONTO_API_BASE_URL || "http://127.0.0.1:8000";
+        logoutButton.addEventListener("click", async () => {
+            logoutButton.disabled = true;
+            try {
+                const response = await fetch(`${window.PRONTO_API_BASE_URL}/logout`, {
+                    method: "POST",
+                    credentials: "include"
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.detail || "Logout failed.");
+                }
+                localStorage.removeItem("loggedIn");
+                localStorage.removeItem("userName");
+                localStorage.removeItem("userType");
+                window.location.replace("login.html");
+            } catch (error) {
+                console.error("Could not log out the worker:", error);
+                alert(workerTranslations[languageSelect.value].logoutFailed);
+                logoutButton.disabled = false;
+            }
+        });
+
+        fetch(`${window.PRONTO_API_BASE_URL}/auth/me`, { credentials: "include" })
+            .then(async (response) => {
+                if (response.status === 401 || response.status === 403) {
+                    const destination = "workers_home.html";
+                    window.location.replace(`login.html?redirect=${encodeURIComponent(destination)}`);
+                    return null;
+                }
+                const account = await response.json();
+                if (!response.ok) {
+                    throw new Error(account.detail || "Could not load the worker profile.");
+                }
+                if (account.role !== "worker") {
+                    window.location.replace("login.html");
+                    return null;
+                }
+                return account;
+            })
+            .then(async (account) => {
+                if (!account) return;
+                loginLink.hidden = true;
+                signupLink.hidden = true;
+                logoutButton.hidden = false;
+                workerName = account.name;
+                workerCsrfToken = account.csrf_token;
+                workerServiceAreaInput.value = account.service_area || "";
+                applyWorkerLanguage(languageSelect.value);
+                await loadCompletedJobsCount();
+                await loadRecentActivities();
+                await loadPendingRequests();
+                setInterval(loadPendingRequests, 5000);
+                setInterval(loadRecentActivities, 30000);
+            })
+            .catch((error) => {
+                console.error("Could not load the signed-in worker name:", error);
+                workerProfileError = true;
+                applyWorkerLanguage(languageSelect.value);
+            });
+    </script>
+
+</body>
+</html>
