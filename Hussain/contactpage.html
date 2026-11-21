@@ -20,7 +20,7 @@
                     <a href="home.html">Home</a>
                     <a href="moksh_homeservices.html">Services</a>
                     <a href="about.html">About</a>
-                    <a href="" class="active">Contact</a>
+                    <a href="contactpage.html" class="active">Contact</a>
                 </nav>
 
                 <div class="nav-buttons">
@@ -36,9 +36,9 @@
             <!-- Mobile Dropdown Menu -->
             <div class="mobile-menu" id="mobileMenu">
                 <a href="home.html">Home</a>
-                <a href="#services">Services</a>
-                <a href="#about" class="active">About</a>
-                <a href="">Contact</a>
+                <a href="moksh_homeservices.html">Services</a>
+                <a href="about.html">About</a>
+                <a href="contactpage.html" class="active">Contact</a>
                 <div class="mobile-auth-buttons">
                     <a href="login.html" class="login-btn">Login</a>
                     <a href="signup.html" class="signup-btn">Sign Up</a>
@@ -120,7 +120,7 @@ def is_logged_in():
 async def handle_logout(event):
     event.preventDefault()
     try:
-        await pyfetch("http://127.0.0.1:8000/logout", method="POST", credentials="include")
+        await pyfetch(f"{js.window.location.origin}/logout", method="POST", credentials="include")
     except Exception:
         js.window.alert("Could not log out from the server. Please try again.")
         return
@@ -180,7 +180,7 @@ async def handle_contact_submit(event):
 
     try:
         response = await pyfetch(
-            "http://127.0.0.1:8000/contact",
+            f"{js.window.location.origin}/contact",
             method="POST",
             headers={"Content-Type": "application/json"},
             body=json.dumps(payload)
@@ -209,7 +209,7 @@ async def handle_contact_submit(event):
                 status_box.style.borderRadius = "6px"
                 status_box.style.marginTop = "15px"
                 status_box.style.textAlign = "center"
-                status_box.innerText = f"❌ {result.get('message', 'Submission failed')}"
+                status_box.innerText = f"❌ {result.get('detail', result.get('message', 'Submission failed'))}"
                 status_box.style.display = "block"
     except Exception as err:
         if status_box:
