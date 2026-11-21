@@ -7,7 +7,6 @@
 
     <title>KAAMKAAJ - Home page</title>
 
-    <link rel="stylesheet" href="style.css">
 
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,7 +80,7 @@
                     <i class="fa-solid fa-arrow-right"></i>
                 </a>
 
-                <a href="../WORKERS FRONTEND/join as worker.html" class="secondary-btn">
+                <a href="signup.html?role=worker" class="secondary-btn">
                     Join as a Worker
                 </a>
 
@@ -333,7 +332,7 @@
                     </li>
                 </ul>
 
-                <a href="../WORKERS FRONTEND/join as worker.html" class="worker-btn">
+                <a href="signup.html?role=worker" class="worker-btn">
                     Join as a Worker
                     <i class="fa-solid fa-arrow-right"></i>
                 </a>
@@ -486,7 +485,7 @@ for i in range(cards.length):
 async def handle_logout(event):
     event.preventDefault()
     try:
-        await pyfetch("http://127.0.0.1:8000/logout", method="POST", credentials="include")
+        await pyfetch(f"{js.window.location.origin}/logout", method="POST", credentials="include")
     except Exception:
         js.window.alert("Could not log out from the server. Please try again.")
         return
