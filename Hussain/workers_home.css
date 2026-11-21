@@ -598,6 +598,36 @@ body {
     margin-bottom: 20px;
 }
 
+.panel-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.sound-toggle {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    background: white;
+    color: var(--primary);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.sound-toggle[aria-pressed="true"] {
+    color: white;
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.sound-toggle:focus-visible {
+    outline: 3px solid #155EEF55;
+    outline-offset: 2px;
+}
+
 .panel-title {
     display: flex;
     align-items: center;
@@ -1098,6 +1128,16 @@ footer span {
     }
 
     .worker-area-controls {
+        flex-direction: column;
+    }
+
+    .panel-header {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .panel-header-actions {
+        align-items: flex-end;
         flex-direction: column;
     }
 
