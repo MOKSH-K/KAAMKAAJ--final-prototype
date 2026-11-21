@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finding a Worker | KAAMKAAJ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: #f3f7f5;
+            color: #17352b;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+        }
+
+        main {
+            width: min(100%, 520px);
+            padding: 48px 36px;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 16px 48px rgba(24, 59, 45, 0.12);
+            text-align: center;
+        }
+
+        .spinner {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 28px;
+            border: 7px solid #dcebe2;
+            border-top-color: #159447;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: clamp(25px, 6vw, 34px);
+        }
+
+        p {
+            color: #5b6d64;
+            line-height: 1.65;
+        }
+
+        #booking-id {
+            margin-top: 24px;
+            color: #79887f;
+            font-size: 14px;
+        }
+
+        #status-message {
+            min-height: 28px;
+            margin-top: 18px;
+            color: #287742;
+            font-weight: 600;
+        }
+
+        .worker-details {
+            margin-top: 22px;
+            padding: 18px 20px;
+            border: 1px solid #d5e7db;
+            border-radius: 12px;
+            background: #f3f9f5;
+            text-align: left;
+        }
+
+        .worker-details h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+
+        .worker-details p {
+            margin-top: 6px;
+        }
+
+        .worker-details a {
+            color: #16803a;
+            font-weight: 600;
+        }
+
+        .worker-details span {
+            overflow-wrap: anywhere;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 10px;
+            margin-top: 22px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #e2eee6;
+        }
+
+        .progress-fill {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #24a148, #087b35);
+            transition: width 0.4s ease;
+        }
+
+        .accepted .spinner {
+            display: none;
+        }
+
+        .accepted h1,
+        .accepted #status-message {
+            color: #16803a;
+        }
+
+        .unavailable .spinner {
+            display: none;
+        }
+
+        .cancelled .spinner {
+            display: none;
+        }
+
+        .unavailable h1,
+        .unavailable #status-message {
+            color: #a64b18;
+        }
+
+        .cancelled h1,
+        .cancelled #status-message {
+            color: #5b6d64;
+        }
+
+        .unavailable .progress-fill {
+            background: #d58b39;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .action-button {
+            width: min(100%, 260px);
+            padding: 13px 20px;
+            border: 0;
+            border-radius: 9px;
+            background: #16803a;
+            color: #fff;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background: #116b30;
+        }
+
+        .action-button.secondary {
+            border: 1px solid #c8d8ce;
+            background: #fff;
+            color: #315343;
+        }
+
+        .action-button.secondary:hover {
+            background: #f3f7f5;
+        }
+
+        .action-button[hidden] {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .spinner {
+                animation-duration: 3s;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main id="booking-card" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <h1 id="page-title">Finding your worker</h1>
+        <p id="page-description">Your booking is in. We’re notifying available workers nearby. This page will update as soon as someone accepts.</p>
+        <div id="status-message" role="status">Waiting for a worker to accept...</div>
+        <div id="progress-track" class="progress-track" role="progressbar"
+             aria-label="Time spent searching for a worker" aria-valuemin="0"
+             aria-valuemax="100" aria-valuenow="0">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div id="booking-id"></div>
+        <section id="worker-details" class="worker-details" aria-live="polite" hidden>
+            <h2>Worker details</h2>
+            <p><strong>Name:</strong> <span id="worker-name"></span></p>
+            <p id="worker-phone-row" hidden>
+                <strong>Phone:</strong> <a id="worker-phone"></a>
+            </p>
+            <p id="worker-service-area-row" hidden>
+                <strong>Service area:</strong> <span id="worker-service-area"></span>
+            </p>
+        </section>
+        <div class="actions">
+            <button id="retry-button" class="action-button" type="button" hidden>Try again later</button>
+            <button id="cancel-button" class="action-button secondary" type="button">Cancel booking and return</button>
+        </div>
+    </main>
+
+    <script>
+        window.PRONTO_API_BASE_URL = window.PRONTO_API_BASE_URL || "http://127.0.0.1:8000";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const bookingId = new URLSearchParams(window.location.search).get("id");
+            const statusMessage = document.getElementById("status-message");
+            const bookingLabel = document.getElementById("booking-id");
+            const bookingCard = document.getElementById("booking-card");
+            const pageTitle = document.getElementById("page-title");
+            const description = document.getElementById("page-description");
+            const retryButton = document.getElementById("retry-button");
+            const cancelButton = document.getElementById("cancel-button");
+            const progressTrack = document.getElementById("progress-track");
+            const progressFill = document.getElementById("progress-fill");
+            const workerDetails = document.getElementById("worker-details");
+            const workerName = document.getElementById("worker-name");
+            const workerPhoneRow = document.getElementById("worker-phone-row");
+            const workerPhone = document.getElementById("worker-phone");
+            const workerServiceAreaRow = document.getElementById("worker-service-area-row");
+            const workerServiceArea = document.getElementById("worker-service-area");
+
+            if (!bookingId || !/^[1-9]\d*$/.test(bookingId)) {
+                statusMessage.textContent = "This booking link is invalid.";
+                return;
+            }
+
+            bookingLabel.textContent = `Booking #${bookingId}`;
+            let checking = false;
+            let stopped = false;
+            let currentStatus = null;
+            let expiryTimer = null;
+            let pollingTimer = null;
+            let progressTimer = null;
+
+            function updateProgress(createdAt) {
+                const startTime = Date.parse(createdAt);
+                if (!Number.isFinite(startTime) || progressTimer !== null) return;
+
+                const refreshProgress = () => {
+                    const progress = Math.min(100, Math.max(0,
+                        Math.floor(((Date.now() - startTime) / 120000) * 100)
+                    ));
+                    progressFill.style.width = `${progress}%`;
+                    progressTrack.setAttribute("aria-valuenow", String(progress));
+                };
+
+                refreshProgress();
+                progressTimer = window.setInterval(refreshProgress, 1000);
+            }
+
+            function finishProgress() {
+                window.clearInterval(progressTimer);
+                progressTimer = null;
+                progressFill.style.width = "100%";
+                progressTrack.setAttribute("aria-valuenow", "100");
+            }
+
+            function showUnavailable() {
+                stopped = true;
+                window.clearTimeout(expiryTimer);
+                window.clearInterval(pollingTimer);
+                finishProgress();
+                bookingCard.classList.add("unavailable");
+                pageTitle.textContent = "No worker is available right now";
+                description.textContent = "No worker accepted this request within two minutes. Please try again later.";
+                statusMessage.textContent = "Your request has expired.";
+                retryButton.hidden = false;
+                cancelButton.textContent = "Return to home";
+            }
+
+            function showCancelled() {
+                stopped = true;
+                window.clearTimeout(expiryTimer);
+                window.clearInterval(pollingTimer);
+                window.clearInterval(progressTimer);
+                bookingCard.classList.add("cancelled");
+                pageTitle.textContent = "Booking cancelled";
+                description.textContent = "This booking was cancelled.";
+                statusMessage.textContent = "You can return home or make a new booking later.";
+                cancelButton.textContent = "Return to home";
+            }
+
+            retryButton.addEventListener("click", () => {
+                window.location.href = "booking_submission.html";
+            });
+            cancelButton.addEventListener("click", async () => {
+                if (currentStatus !== null && currentStatus !== "pending") {
+                    window.location.href = "home.html";
+                    return;
+                }
+
+                cancelButton.disabled = true;
+                statusMessage.textContent = "Cancelling your booking...";
+                try {
+                    const sessionResponse = await fetch(
+                        `${window.PRONTO_API_BASE_URL}/auth/me`,
+                        { credentials: "include" }
+                    );
+                    if (sessionResponse.status === 401) {
+                        const destination = `booking_waiting.html?id=${encodeURIComponent(bookingId)}`;
+                        window.location.replace(`login.html?redirect=${encodeURIComponent(destination)}`);
+                        return;
+                    }
+                    const session = await sessionResponse.json();
+                    if (!sessionResponse.ok) {
+                        throw new Error(session.detail || "Could not verify your session.");
+                    }
+
+                    const response = await fetch(
+                        `${window.PRONTO_API_BASE_URL}/service-requests/${encodeURIComponent(bookingId)}/cancel`,
+                        {
+                            method: "POST",
+                            credentials: "include",
+                            headers: { "X-CSRF-Token": session.csrf_token }
+                        }
+                    );
+                    const result = await response.json();
+                    if (response.status === 409) {
+                        await checkBookingStatus();
+                        statusMessage.textContent = result.detail || "This booking can no longer be cancelled.";
+                        return;
+                    }
+                    if (!response.ok) {
+                        throw new Error(result.detail || "Could not cancel this booking.");
+                    }
+
+                    stopped = true;
+                    window.clearTimeout(expiryTimer);
+                    window.clearInterval(pollingTimer);
+                    window.clearInterval(progressTimer);
+                    window.location.replace("home.html");
+                } catch (error) {
+                    statusMessage.textContent = error.message || "Could not cancel this booking. Please try again.";
+                    cancelButton.disabled = false;
+                }
+            });
+
+            async function checkBookingStatus() {
+                if (checking || stopped) return;
+                checking = true;
+                try {
+                    const response = await fetch(
+                        `${window.PRONTO_API_BASE_URL}/service-requests/${encodeURIComponent(bookingId)}`,
+                        { credentials: "include" }
+                    );
+
+                    if (response.status === 401) {
+                        const destination = `booking_waiting.html?id=${encodeURIComponent(bookingId)}`;
+                        window.location.replace(`login.html?redirect=${encodeURIComponent(destination)}`);
+                        stopped = true;
+                        return;
+                    }
+
+                    const result = await response.json();
+                    if (!response.ok) {
+                        throw new Error(result.detail || "Could not check this booking.");
+                    }
+                    currentStatus = result.status;
+
+                    if (expiryTimer === null && result.status === "pending") {
+                        const createdAt = Date.parse(result.created_at);
+                        if (Number.isFinite(createdAt)) {
+                            const remaining = createdAt + 120000 - Date.now();
+                            updateProgress(result.created_at);
+                            expiryTimer = window.setTimeout(checkBookingStatus, Math.max(0, remaining));
+                        }
+                    }
+
+                    if (result.status === "accepted") {
+                        stopped = true;
+                        window.clearTimeout(expiryTimer);
+                        window.clearInterval(pollingTimer);
+                        finishProgress();
+                        bookingCard.classList.add("accepted");
+                        pageTitle.textContent = "A worker accepted your booking!";
+                        description.textContent = result.worker_name
+                            ? `${result.worker_name} has accepted your request and will be in touch.`
+                            : "A worker has accepted your request.";
+                        if (result.worker_name || result.worker_phone) {
+                            workerName.textContent = result.worker_name || "Worker";
+                            workerDetails.hidden = false;
+                        }
+                        if (result.worker_phone) {
+                            workerPhone.textContent = result.worker_phone;
+                            workerPhone.href = `tel:${result.worker_phone.replace(/[^\d+]/g, "")}`;
+                            workerPhoneRow.hidden = false;
+                        }
+                        if (result.worker_service_area) {
+                            workerServiceArea.textContent = result.worker_service_area;
+                            workerServiceAreaRow.hidden = false;
+                        }
+                        statusMessage.textContent = "Your booking is confirmed.";
+                        cancelButton.textContent = "Return to home";
+                    } else if (result.status === "unavailable") {
+                        showUnavailable();
+                    } else if (result.status === "cancelled") {
+                        showCancelled();
+                    } else {
+                        statusMessage.textContent = "Your booking is sent. Still waiting for a worker to accept...";
+                    }
+                } catch (error) {
+                    statusMessage.textContent = error.message || "Connection issue. We’ll keep checking.";
+                } finally {
+                    checking = false;
+                }
+            }
+
+            checkBookingStatus();
+            pollingTimer = window.setInterval(checkBookingStatus, 5000);
+        });
+    </script>
+</body>
+</html>
