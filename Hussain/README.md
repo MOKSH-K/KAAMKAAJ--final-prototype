@@ -50,3 +50,19 @@ displays the worker name from the authenticated session.
 
 For HTTPS deployments, set `KAAMKAAJ_COOKIE_SECURE=true` and serve the frontend
 from a trusted origin.
+
+## Production deployment
+
+Install the dependencies from the repository root and start the app with:
+
+```powershell
+py -m pip install -r requirements.txt
+cd Hussain
+py -m uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Set `KAAMKAAJ_COOKIE_SECURE=true` for HTTPS. For an explicitly separate frontend
+origin, set `KAAMKAAJ_CORS_ORIGINS` to a comma-separated origin list. Because
+this project uses SQLite, production hosting must provide a persistent writable
+disk for `kaamkaaj.db` or set `KAAMKAAJ_DATABASE` to a persistent database file
+path.
