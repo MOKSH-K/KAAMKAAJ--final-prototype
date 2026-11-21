@@ -309,8 +309,14 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Kaamkaaj API", version="1.0.0", lifespan=lifespan)
+cors_origins = [
+    origin.strip()
+    for origin in os.getenv("KAAMKAAJ_CORS_ORIGINS", "").split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=cors_origins,
     allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
