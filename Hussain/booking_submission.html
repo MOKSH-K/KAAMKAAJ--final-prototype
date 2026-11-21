@@ -8,10 +8,9 @@
     <title>KAAMKAAJ - Booking Submission</title>
 
     <script>
-        window.PRONTO_API_BASE_URL = window.PRONTO_API_BASE_URL || "http://127.0.0.1:8000";
+        window.PRONTO_API_BASE_URL = window.PRONTO_API_BASE_URL || window.location.origin;
     </script>
 
-    <link rel="stylesheet" href="style.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -390,7 +389,7 @@ def is_logged_in():
 async def handle_logout(event):
     event.preventDefault()
     try:
-        await pyfetch("http://127.0.0.1:8000/logout", method="POST", credentials="include")
+        await pyfetch(f"{js.window.location.origin}/logout", method="POST", credentials="include")
     except Exception:
         js.window.alert("Could not log out from the server. Please try again.")
         return
