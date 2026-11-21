@@ -263,9 +263,13 @@
 
                     </div>
 
-                    <div class="live-status">
-                        <span></span>
-                        <span data-i18n="live">ಲೈವ್</span>
+                    <div class="panel-header-actions">
+                        <button id="notification-sound-toggle" class="sound-toggle" type="button"
+                                aria-pressed="false">Enable sound</button>
+                        <div class="live-status">
+                            <span></span>
+                            <span data-i18n="live">ಲೈವ್</span>
+                        </div>
                     </div>
 
                 </div>
@@ -412,6 +416,10 @@
                 signup: "Sign Up",
                 logout: "Log Out",
                 logoutFailed: "Could not log you out. Please try again.",
+                enableSound: "Enable sound",
+                soundOn: "Sound on",
+                soundUnavailable: "Sound is unavailable in this browser.",
+                soundEnableFailed: "Could not enable sound.",
                 welcome: "Hello, {name}! 👋",
                 heroTitle: "Ready to get to work?",
                 heroDescription: "Start your jobs and earn money.",
@@ -486,6 +494,10 @@
                 signup: "ಸೈನ್ ಅಪ್",
                 logout: "ಲಾಗ್ ಔಟ್",
                 logoutFailed: "ಲಾಗ್ ಔಟ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+                enableSound: "ಧ್ವನಿಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ",
+                soundOn: "ಧ್ವನಿ ಆನ್",
+                soundUnavailable: "ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಧ್ವನಿ ಲಭ್ಯವಿಲ್ಲ.",
+                soundEnableFailed: "ಧ್ವನಿಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
                 welcome: "ನಮಸ್ಕಾರ, {name}! 👋",
                 heroTitle: "ಕೆಲಸಕ್ಕೆ ಸಿದ್ಧರಿದ್ದೀರಾ?",
                 heroDescription: "ನಿಮ್ಮ ಕೆಲಸವನ್ನು ಪ್ರಾರಂಭಿಸಿ ಮತ್ತು ಹಣ ಸಂಪಾದಿಸಿ.",
@@ -560,6 +572,10 @@
                 signup: "साइन अप",
                 logout: "लॉग आउट",
                 logoutFailed: "लॉग आउट नहीं हो सका। कृपया फिर से कोशिश करें।",
+                enableSound: "ध्वनि चालू करें",
+                soundOn: "ध्वनि चालू है",
+                soundUnavailable: "इस ब्राउज़र में ध्वनि उपलब्ध नहीं है।",
+                soundEnableFailed: "ध्वनि चालू नहीं हो सकी।",
                 welcome: "नमस्ते, {name}! 👋",
                 heroTitle: "काम शुरू करने के लिए तैयार हैं?",
                 heroDescription: "अपना काम शुरू करें और पैसे कमाएँ।",
@@ -628,6 +644,7 @@
         const loginLink = document.querySelector(".auth-buttons .login-button");
         const signupLink = document.querySelector(".auth-buttons .signup-button:not(#logout-button)");
         const logoutButton = document.getElementById("logout-button");
+        const notificationSoundButton = document.getElementById("notification-sound-toggle");
         const todayEarningsValue = document.getElementById("today-earnings-value");
         const completedJobsCount = document.getElementById("completed-jobs-count");
         const completedJobsError = document.getElementById("completed-jobs-error");
@@ -650,7 +667,10 @@
         let workerProfileError = false;
         let pendingRequests = [];
         let pendingRequestsLoaded = false;
+        let lastObservedPendingRequestIds = null;
         let pendingRequestsPromise = null;
+        let notificationAudioContext = null;
+        let notificationSoundEnabled = false;
         let recentActivities = [];
         let recentActivitiesLoaded = false;
         let recentActivitiesFailed = false;
@@ -701,6 +721,63 @@
             requestStatus.dataset.i18n = messageKey;
             requestStatus.textContent = dictionary[messageKey];
             requestStatus.hidden = false;
+        }
+
+        function updateNotificationSoundButton(messageKey) {
+            const dictionary = workerTranslations[languageSelect.value];
+            notificationSoundButton.textContent =
+                dictionary[messageKey || (notificationSoundEnabled ? "soundOn" : "enableSound")];
+            notificationSoundButton.setAttribute(
+                "aria-pressed",
+                String(notificationSoundEnabled)
+            );
+        }
+
+        function playNotificationSound() {
+            if (!notificationSoundEnabled || !notificationAudioContext) return;
+
+            const startTime = notificationAudioContext.currentTime;
+            [880, 1175].forEach((frequency, index) => {
+                const noteStart = startTime + index * 0.16;
+                const oscillator = notificationAudioContext.createOscillator();
+                const volume = notificationAudioContext.createGain();
+                oscillator.type = "sine";
+                oscillator.frequency.value = frequency;
+                volume.gain.setValueAtTime(0.0001, noteStart);
+                volume.gain.exponentialRampToValueAtTime(0.12, noteStart + 0.02);
+                volume.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.24);
+                oscillator.connect(volume);
+                volume.connect(notificationAudioContext.destination);
+                oscillator.start(noteStart);
+                oscillator.stop(noteStart + 0.25);
+            });
+        }
+
+        async function toggleNotificationSound() {
+            if (notificationSoundEnabled) {
+                notificationSoundEnabled = false;
+                updateNotificationSoundButton();
+                return;
+            }
+
+            const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextConstructor) {
+                updateNotificationSoundButton("soundUnavailable");
+                return;
+            }
+
+            try {
+                if (!notificationAudioContext) {
+                    notificationAudioContext = new AudioContextConstructor();
+                }
+                await notificationAudioContext.resume();
+                notificationSoundEnabled = true;
+                updateNotificationSoundButton();
+                playNotificationSound();
+            } catch (error) {
+                console.error("Could not enable request notification sound:", error);
+                updateNotificationSoundButton("soundEnableFailed");
+            }
         }
 
         function formatRequestValue(value) {
@@ -843,6 +920,21 @@
                     if (!response.ok) {
                         throw new Error(result.detail || "Could not load worker requests.");
                     }
+                    if (!Array.isArray(result.requests)) {
+                        throw new Error("The worker request response was invalid.");
+                    }
+                    const currentRequestIds = new Set(
+                        result.requests.map((request) => String(request.id))
+                    );
+                    if (
+                        lastObservedPendingRequestIds !== null &&
+                        result.requests.some(
+                            (request) => !lastObservedPendingRequestIds.has(String(request.id))
+                        )
+                    ) {
+                        playNotificationSound();
+                    }
+                    lastObservedPendingRequestIds = currentRequestIds;
                     pendingRequests = result.requests;
                     pendingRequestsLoaded = true;
                     renderPendingRequests();
@@ -997,6 +1089,7 @@
                 if (translation) element.setAttribute("aria-label", translation);
             });
             updateAvailabilityStatus(dictionary);
+            updateNotificationSoundButton();
         }
 
         const savedLanguage = localStorage.getItem("kaamkaaj-worker-language") || "kn";
@@ -1012,6 +1105,8 @@
             updateAvailabilityStatus(workerTranslations[languageSelect.value]);
         });
         saveServiceAreaButton.addEventListener("click", saveWorkerServiceArea);
+        notificationSoundButton.addEventListener("click", toggleNotificationSound);
+        updateNotificationSoundButton();
         window.PRONTO_API_BASE_URL = window.PRONTO_API_BASE_URL || window.location.origin;
         logoutButton.addEventListener("click", async () => {
             logoutButton.disabled = true;
