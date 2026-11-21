@@ -59,7 +59,7 @@ for i in range(cards.length):
 async def handle_logout(event):
     event.preventDefault()
     try:
-        await pyfetch("http://127.0.0.1:8000/logout", method="POST", credentials="include")
+        await pyfetch(f"{js.window.location.origin}/logout", method="POST", credentials="include")
     except Exception:
         js.window.alert("Could not log out from the server. Please try again.")
         return
