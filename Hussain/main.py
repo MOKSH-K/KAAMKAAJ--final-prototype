@@ -531,7 +531,13 @@ def logout(request: Request, response: Response) -> dict[str, str]:
             connection.execute(
                 "DELETE FROM sessions WHERE token_hash = ?", (token_digest(session_token),)
             )
-    response.delete_cookie(SESSION_COOKIE, path="/", httponly=True, samesite="lax")
+    response.delete_cookie(
+        SESSION_COOKIE,
+        path="/",
+        httponly=True,
+        secure=os.getenv("KAAMKAAJ_COOKIE_SECURE", "false").lower() == "true",
+        samesite="lax",
+    )
     return {"status": "success", "message": "Logged out successfully."}
 
 
