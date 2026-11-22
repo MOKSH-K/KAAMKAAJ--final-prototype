@@ -721,7 +721,7 @@ def get_worker_stats(
             SELECT COUNT(*) AS completed_jobs_today
             FROM service_requests
             WHERE worker_id = ? AND status = 'accepted'
-                AND accepted_at >= ? AND accepted_at < ?
+                AND accepted_at >= ? AND accepted_at < ? AND cancelled_at IS NULL
             """,
             (
                 account.account_id,
@@ -743,6 +743,7 @@ def get_worker_activity(account: CurrentAccount) -> dict[str, Any]:
             FROM service_requests AS sr
             JOIN users AS u ON u.id = sr.user_id
             WHERE sr.worker_id = ? AND sr.status = 'accepted' AND sr.accepted_at IS NOT NULL
+                AND sr.cancelled_at IS NULL
             ORDER BY sr.accepted_at DESC, sr.id DESC
             """,
             (account.account_id,),
@@ -810,6 +811,48 @@ def accept_service_request(
     }
 
 
+@app.post("/worker/service-requests/{request_id}/cancel")
+def cancel_accepted_service_request(
+    request_id: int,
+    request: Request,
+    account: CurrentAccount,
+) -> dict[str, str]:
+    if account.role != "worker":
+        raise HTTPException(status_code=403, detail="Only worker accounts can cancel accepted bookings.")
+    require_csrf(request, account)
+    with get_connection() as connection:
+        cursor = connection.execute(
+            """
+            UPDATE service_requests
+            SET cancelled_at = ?
+            WHERE id = ? AND worker_id = ? AND status = 'accepted' AND cancelled_at IS NULL
+            """,
+            (timestamp(), request_id, account.account_id),
+        )
+        if cursor.rowcount == 0:
+            row = connection.execute(
+                """
+                SELECT worker_id, status, cancelled_at
+                FROM service_requests
+                WHERE id = ?
+                """,
+                (request_id,),
+            ).fetchone()
+            if row is None or row["worker_id"] != account.account_id:
+                raise HTTPException(status_code=404, detail="Booking not found.")
+            if row["cancelled_at"] is not None:
+                return {"status": "success", "booking_status": "cancelled"}
+            raise HTTPException(
+                status_code=409,
+                detail="Only an accepted booking can be cancelled.",
+            )
+    return {
+        "status": "success",
+        "booking_status": "cancelled",
+        "message": "Booking cancelled.",
+    }
+
+
 @app.post("/contact")
 def create_contact_submission(data: ContactSubmission) -> dict[str, str]:
     name = data.name.strip()
@@ -831,7 +874,7 @@ def create_contact_submission(data: ContactSubmission) -> dict[str, str]:
 @app.get("/{file_path:path}", include_in_schema=False)
 def frontend_file(file_path: str, request: Request) -> Response:
     candidate = (BASE_DIR / file_path).resolve()
-    if candidate.parent != BASE_DIR or candidate.suffix.lower() not in {".html", ".css", ".js"}:
+    if candidate.parent != BASE_DIR or candidate.suffix.lower() not in {".html", ".css", ".js", ".mp3"}:
         raise HTTPException(status_code=404, detail="File not found.")
     if not candidate.is_file():
         raise HTTPException(status_code=404, detail="File not found.")
