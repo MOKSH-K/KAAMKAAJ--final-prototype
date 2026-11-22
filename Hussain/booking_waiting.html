@@ -285,9 +285,11 @@
 
             function showCancelled() {
                 stopped = true;
+                currentStatus = "cancelled";
                 window.clearTimeout(expiryTimer);
                 window.clearInterval(pollingTimer);
                 window.clearInterval(progressTimer);
+                cancelButton.disabled = false;
                 bookingCard.classList.add("cancelled");
                 bookingCard.classList.remove("accepted");
                 workerDetails.hidden = true;
@@ -301,8 +303,15 @@
                 window.location.href = "booking_submission.html";
             });
             cancelButton.addEventListener("click", async () => {
-                if (currentStatus !== null && currentStatus !== "pending") {
+                if (currentStatus !== null && !["pending", "accepted"].includes(currentStatus)) {
                     window.location.href = "home.html";
+                    return;
+                }
+                const wasAccepted = currentStatus === "accepted";
+                if (
+                    wasAccepted &&
+                    !window.confirm("Cancel this confirmed booking? The booking will be cancelled.")
+                ) {
                     return;
                 }
 
@@ -341,6 +350,10 @@
                         throw new Error(result.detail || "Could not cancel this booking.");
                     }
 
+                    if (wasAccepted) {
+                        showCancelled();
+                        return;
+                    }
                     stopped = true;
                     window.clearTimeout(expiryTimer);
                     window.clearInterval(pollingTimer);
@@ -413,7 +426,7 @@
                                 workerServiceAreaRow.hidden = false;
                             }
                             statusMessage.textContent = "Your booking is confirmed.";
-                            cancelButton.textContent = "Return to home";
+                            cancelButton.textContent = "Cancel confirmed booking";
                         }
                     } else if (result.status === "unavailable") {
                         showUnavailable();
