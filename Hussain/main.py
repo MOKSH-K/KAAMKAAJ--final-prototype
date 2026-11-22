@@ -635,7 +635,8 @@ def cancel_service_request(
             """
             UPDATE service_requests
             SET cancelled_at = ?
-            WHERE id = ? AND user_id = ? AND status = 'pending' AND cancelled_at IS NULL
+            WHERE id = ? AND user_id = ? AND status IN ('pending', 'accepted')
+                AND cancelled_at IS NULL
             """,
             (timestamp(), request_id, account.account_id),
         )
@@ -654,7 +655,7 @@ def cancel_service_request(
                 return {"status": "success", "booking_status": "cancelled"}
             raise HTTPException(
                 status_code=409,
-                detail="This booking can no longer be cancelled because a worker has accepted it.",
+                detail="This booking can no longer be cancelled.",
             )
     return {
         "status": "success",
