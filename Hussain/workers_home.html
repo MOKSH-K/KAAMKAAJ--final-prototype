@@ -768,7 +768,7 @@
             notificationPlaybackTimer = window.setTimeout(() => {
                 notificationAudio.pause();
                 notificationAudio.currentTime = 0;
-            }, 2500);
+            }, 10000);
         }
 
         async function toggleNotificationSound() {
@@ -792,7 +792,7 @@
                         `${window.PRONTO_API_BASE_URL}/freesound_community-alarm-68936.mp3`
                     );
                     notificationAudio.preload = "auto";
-                    notificationAudio.volume = 0.15;
+                    notificationAudio.volume = 0.3;
                 }
                 notificationSoundEnabled = true;
                 updateNotificationSoundButton();
