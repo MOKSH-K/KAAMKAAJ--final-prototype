@@ -953,6 +953,40 @@ body {
     color: var(--grey);
 }
 
+.cancel-booking-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 8px;
+    padding: 7px 12px;
+    border: 1px solid #FECACA;
+    border-radius: 999px;
+    background: white;
+    color: #B42318;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.cancel-booking-button:hover:not(:disabled) {
+    border-color: #FDA29B;
+    background: #FEF3F2;
+    box-shadow: 0 2px 6px #B4231818;
+}
+
+.cancel-booking-button:focus-visible {
+    outline: 3px solid #FDA29B;
+    outline-offset: 2px;
+}
+
+.cancel-booking-button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
 .activity-reference {
     color: var(--primary);
     font-size: 11px;
