@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KAAMKAAJ Login</title>
+    <script src="api-config.js"></script>
     <style>
         * {
             margin: 0;
@@ -249,9 +250,18 @@
         document.addEventListener("DOMContentLoaded", () => {
             const redirectParam = new URLSearchParams(window.location.search).get("redirect");
             const roleParam = new URLSearchParams(window.location.search).get("role");
-            if (roleParam === "worker" || (redirectParam && redirectParam.includes("workers_home.html"))) {
+            const redirectPage = redirectParam
+                ? redirectParam.split(/[?#]/, 1)[0].split("/").pop()
+                : "";
+            const userPages = new Set([
+                "moksh_homeservices.html",
+                "packages.html",
+                "booking_submission.html",
+                "booking_waiting.html"
+            ]);
+            if (roleParam === "worker" || (!roleParam && redirectPage === "workers_home.html")) {
                 document.getElementById("worker-tab").checked = true;
-            } else if (roleParam === "user") {
+            } else if (roleParam === "user" || (!roleParam && userPages.has(redirectPage))) {
                 document.getElementById("user-tab").checked = true;
             }
             if (redirectParam) {
@@ -265,14 +275,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const statusBox = document.getElementById("status-message");
-        const isLocalFrontend = ["localhost", "127.0.0.1"].includes(window.location.hostname)
-            && window.location.port !== "8000";
-        const apiBaseUrl = (
-            window.PRONTO_API_BASE_URL ||
-            (isLocalFrontend
-                ? `http://${window.location.hostname}:8000`
-                : window.location.origin)
-        ).replace(/\/+$/, "");
+        const apiBaseUrl = window.PRONTO_API_BASE_URL;
 
         async function submitLogin(event, role) {
             event.preventDefault();
