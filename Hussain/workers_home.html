@@ -380,6 +380,10 @@
                                 •
                                 <time data-activity-date></time>
                             </p>
+                            <button type="button" class="cancel-booking-button" data-activity-cancel>
+                                <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                                <span data-cancel-label></span>
+                            </button>
                         </div>
                         <span class="activity-reference" data-activity-reference></span>
                     </div>
@@ -462,6 +466,10 @@
                 requestsLoadFailed: "Could not load requests. Please refresh the page.",
                 acceptFailed: "Could not accept this request. Please try again.",
                 bookingAccepted: "Request accepted.",
+                cancelBooking: "Cancel booking",
+                cancelBookingConfirm: "Cancel this accepted booking? The customer will be notified and must create a new request.",
+                bookingCancelled: "Booking cancelled. The customer will need to place a new request.",
+                cancelBookingFailed: "Could not cancel this booking. Please try again.",
                 statsLoadFailed: "Could not load today's completed jobs.",
                 serviceNames: {
                     sweeping: "Sweeping",
@@ -540,6 +548,10 @@
                 requestsLoadFailed: "ವಿನಂತಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಪುಟವನ್ನು ಮರುಲೋಡ್ ಮಾಡಿ.",
                 acceptFailed: "ಈ ವಿನಂತಿಯನ್ನು ಸ್ವೀಕರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
                 bookingAccepted: "ವಿನಂತಿಯನ್ನು ಸ್ವೀಕರಿಸಲಾಗಿದೆ.",
+                cancelBooking: "ಬುಕಿಂಗ್ ರದ್ದುಮಾಡಿ",
+                cancelBookingConfirm: "ಈ ಸ್ವೀಕರಿಸಿದ ಬುಕಿಂಗ್ ಅನ್ನು ರದ್ದುಮಾಡಬೇಕೇ? ಗ್ರಾಹಕರಿಗೆ ತಿಳಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಅವರು ಹೊಸ ವಿನಂತಿಯನ್ನು ಮಾಡಬೇಕಾಗುತ್ತದೆ.",
+                bookingCancelled: "ಬುಕಿಂಗ್ ರದ್ದಾಗಿದೆ. ಗ್ರಾಹಕರು ಹೊಸ ವಿನಂತಿಯನ್ನು ಮಾಡಬೇಕಾಗುತ್ತದೆ.",
+                cancelBookingFailed: "ಈ ಬುಕಿಂಗ್ ರದ್ದುಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
                 statsLoadFailed: "ಇಂದಿನ ಪೂರ್ಣಗೊಂಡ ಕೆಲಸಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
                 serviceNames: {
                     sweeping: "ಗುಡಿಸುವುದು",
@@ -618,6 +630,10 @@
                 requestsLoadFailed: "अनुरोध लोड नहीं हो सके। कृपया पेज रीफ़्रेश करें।",
                 acceptFailed: "यह अनुरोध स्वीकार नहीं हो सका। कृपया फिर से कोशिश करें।",
                 bookingAccepted: "अनुरोध स्वीकार कर लिया गया।",
+                cancelBooking: "बुकिंग रद्द करें",
+                cancelBookingConfirm: "क्या यह स्वीकृत बुकिंग रद्द करें? ग्राहक को सूचना दी जाएगी और उन्हें नया अनुरोध करना होगा।",
+                bookingCancelled: "बुकिंग रद्द कर दी गई। ग्राहक को नया अनुरोध करना होगा।",
+                cancelBookingFailed: "यह बुकिंग रद्द नहीं हो सकी। कृपया फिर से कोशिश करें।",
                 statsLoadFailed: "आज पूरे हुए काम लोड नहीं हो सके।",
                 serviceNames: {
                     sweeping: "झाड़ू लगाना",
@@ -670,7 +686,8 @@
         let pendingRequestsLoaded = false;
         let lastObservedPendingRequestIds = null;
         let pendingRequestsPromise = null;
-        let notificationAudioContext = null;
+        let notificationAudio = null;
+        let notificationPlaybackTimer = null;
         let notificationSoundEnabled = false;
         let recentActivities = [];
         let recentActivitiesLoaded = false;
@@ -734,49 +751,55 @@
             );
         }
 
-        function playNotificationSound() {
-            if (!notificationSoundEnabled || !notificationAudioContext) return;
+        async function playNotificationSound() {
+            if (!notificationSoundEnabled || !notificationAudio) return;
 
-            const startTime = notificationAudioContext.currentTime;
-            [880, 1175].forEach((frequency, index) => {
-                const noteStart = startTime + index * 0.16;
-                const oscillator = notificationAudioContext.createOscillator();
-                const volume = notificationAudioContext.createGain();
-                oscillator.type = "sine";
-                oscillator.frequency.value = frequency;
-                volume.gain.setValueAtTime(0.0001, noteStart);
-                volume.gain.exponentialRampToValueAtTime(0.12, noteStart + 0.02);
-                volume.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.24);
-                oscillator.connect(volume);
-                volume.connect(notificationAudioContext.destination);
-                oscillator.start(noteStart);
-                oscillator.stop(noteStart + 0.25);
-            });
+            window.clearTimeout(notificationPlaybackTimer);
+            notificationAudio.pause();
+            notificationAudio.currentTime = 0;
+            try {
+                await notificationAudio.play();
+            } catch (error) {
+                console.error("Could not play request notification sound:", error);
+                notificationSoundEnabled = false;
+                updateNotificationSoundButton("soundEnableFailed");
+                return;
+            }
+            notificationPlaybackTimer = window.setTimeout(() => {
+                notificationAudio.pause();
+                notificationAudio.currentTime = 0;
+            }, 2500);
         }
 
         async function toggleNotificationSound() {
             if (notificationSoundEnabled) {
                 notificationSoundEnabled = false;
+                window.clearTimeout(notificationPlaybackTimer);
+                notificationAudio.pause();
+                notificationAudio.currentTime = 0;
                 updateNotificationSoundButton();
                 return;
             }
 
-            const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContextConstructor) {
+            if (typeof window.Audio !== "function") {
                 updateNotificationSoundButton("soundUnavailable");
                 return;
             }
 
             try {
-                if (!notificationAudioContext) {
-                    notificationAudioContext = new AudioContextConstructor();
+                if (!notificationAudio) {
+                    notificationAudio = new Audio(
+                        `${window.PRONTO_API_BASE_URL}/freesound_community-alarm-68936.mp3`
+                    );
+                    notificationAudio.preload = "auto";
+                    notificationAudio.volume = 0.15;
                 }
-                await notificationAudioContext.resume();
                 notificationSoundEnabled = true;
                 updateNotificationSoundButton();
-                playNotificationSound();
+                await playNotificationSound();
             } catch (error) {
                 console.error("Could not enable request notification sound:", error);
+                notificationSoundEnabled = false;
                 updateNotificationSoundButton("soundEnableFailed");
             }
         }
@@ -874,6 +897,12 @@
                     });
                 item.querySelector("[data-activity-reference]").textContent =
                     `#${activity.id}`;
+                const cancelButton = item.querySelector("[data-activity-cancel]");
+                cancelButton.querySelector("[data-cancel-label]").textContent =
+                    dictionary.cancelBooking;
+                cancelButton.addEventListener("click", () => {
+                    cancelAcceptedBooking(activity.id, cancelButton);
+                });
                 activityList.append(item);
             });
         }
@@ -1051,6 +1080,37 @@
             } finally {
                 acceptingRequest = false;
                 await loadPendingRequests(true);
+            }
+        }
+
+        async function cancelAcceptedBooking(requestId, button) {
+            const dictionary = workerTranslations[languageSelect.value];
+            if (!requestId || button.disabled || !window.confirm(dictionary.cancelBookingConfirm)) {
+                return;
+            }
+
+            button.disabled = true;
+            try {
+                const response = await fetch(
+                    `${window.PRONTO_API_BASE_URL}/worker/service-requests/${encodeURIComponent(requestId)}/cancel`,
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "X-CSRF-Token": workerCsrfToken }
+                    }
+                );
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.detail || dictionary.cancelBookingFailed);
+                }
+
+                await Promise.all([loadCompletedJobsCount(), loadRecentActivities()]);
+                showRequestStatus("bookingCancelled");
+            } catch (error) {
+                console.error("Could not cancel the accepted worker booking:", error);
+                showRequestStatus("cancelBookingFailed");
+            } finally {
+                if (button.isConnected) button.disabled = false;
             }
         }
 
