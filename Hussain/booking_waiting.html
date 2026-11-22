@@ -289,6 +289,8 @@
                 window.clearInterval(pollingTimer);
                 window.clearInterval(progressTimer);
                 bookingCard.classList.add("cancelled");
+                bookingCard.classList.remove("accepted");
+                workerDetails.hidden = true;
                 pageTitle.textContent = "Booking cancelled";
                 description.textContent = "This booking was cancelled.";
                 statusMessage.textContent = "You can return home or make a new booking later.";
@@ -375,6 +377,7 @@
                     if (!response.ok) {
                         throw new Error(result.detail || "Could not check this booking.");
                     }
+                    const previousStatus = currentStatus;
                     currentStatus = result.status;
 
                     if (expiryTimer === null && result.status === "pending") {
@@ -387,30 +390,31 @@
                     }
 
                     if (result.status === "accepted") {
-                        stopped = true;
-                        window.clearTimeout(expiryTimer);
-                        window.clearInterval(pollingTimer);
-                        finishProgress();
-                        bookingCard.classList.add("accepted");
-                        pageTitle.textContent = "A worker accepted your booking!";
-                        description.textContent = result.worker_name
-                            ? `${result.worker_name} has accepted your request and will be in touch.`
-                            : "A worker has accepted your request.";
-                        if (result.worker_name || result.worker_phone) {
-                            workerName.textContent = result.worker_name || "Worker";
-                            workerDetails.hidden = false;
+                        if (previousStatus !== "accepted") {
+                            window.clearTimeout(expiryTimer);
+                            expiryTimer = null;
+                            finishProgress();
+                            bookingCard.classList.add("accepted");
+                            pageTitle.textContent = "A worker accepted your booking!";
+                            description.textContent = result.worker_name
+                                ? `${result.worker_name} has accepted your request and will be in touch.`
+                                : "A worker has accepted your request.";
+                            if (result.worker_name || result.worker_phone) {
+                                workerName.textContent = result.worker_name || "Worker";
+                                workerDetails.hidden = false;
+                            }
+                            if (result.worker_phone) {
+                                workerPhone.textContent = result.worker_phone;
+                                workerPhone.href = `tel:${result.worker_phone.replace(/[^\d+]/g, "")}`;
+                                workerPhoneRow.hidden = false;
+                            }
+                            if (result.worker_service_area) {
+                                workerServiceArea.textContent = result.worker_service_area;
+                                workerServiceAreaRow.hidden = false;
+                            }
+                            statusMessage.textContent = "Your booking is confirmed.";
+                            cancelButton.textContent = "Return to home";
                         }
-                        if (result.worker_phone) {
-                            workerPhone.textContent = result.worker_phone;
-                            workerPhone.href = `tel:${result.worker_phone.replace(/[^\d+]/g, "")}`;
-                            workerPhoneRow.hidden = false;
-                        }
-                        if (result.worker_service_area) {
-                            workerServiceArea.textContent = result.worker_service_area;
-                            workerServiceAreaRow.hidden = false;
-                        }
-                        statusMessage.textContent = "Your booking is confirmed.";
-                        cancelButton.textContent = "Return to home";
                     } else if (result.status === "unavailable") {
                         showUnavailable();
                     } else if (result.status === "cancelled") {
