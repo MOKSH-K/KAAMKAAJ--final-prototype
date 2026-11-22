@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finding a Worker | KAAMKAAJ</title>
+    <script src="api-config.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -215,8 +216,6 @@
     </main>
 
     <script>
-        window.PRONTO_API_BASE_URL = window.PRONTO_API_BASE_URL || window.location.origin;
-
         document.addEventListener("DOMContentLoaded", () => {
             const bookingId = new URLSearchParams(window.location.search).get("id");
             const statusMessage = document.getElementById("status-message");
