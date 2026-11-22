@@ -792,11 +792,10 @@
                         `${window.PRONTO_API_BASE_URL}/freesound_community-alarm-68936.mp3`
                     );
                     notificationAudio.preload = "auto";
-                    notificationAudio.volume = 0.3;
+                    notificationAudio.volume = 0.7;
                 }
                 notificationSoundEnabled = true;
                 updateNotificationSoundButton();
-                await playNotificationSound();
             } catch (error) {
                 console.error("Could not enable request notification sound:", error);
                 notificationSoundEnabled = false;
