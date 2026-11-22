@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="api-config.js"></script>
     <title>KAAMKAAJ Signup</title>
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
@@ -272,9 +273,22 @@
             const params = new URLSearchParams(window.location.search);
             const redirectParam = params.get("redirect");
             const roleParam = params.get("role");
+            const redirectPage = redirectParam
+                ? redirectParam.split(/[?#]/, 1)[0].split("/").pop()
+                : "";
+            const userPages = new Set([
+                "moksh_homeservices.html",
+                "packages.html",
+                "booking_submission.html",
+                "booking_waiting.html"
+            ]);
             if (roleParam === "user") {
                 document.getElementById("user-tab").checked = true;
-            } else if (roleParam !== "worker") {
+            } else if (roleParam === "worker" || redirectPage === "workers_home.html") {
+                document.getElementById("worker-tab").checked = true;
+            } else if (userPages.has(redirectPage)) {
+                document.getElementById("user-tab").checked = true;
+            } else {
                 document.getElementById("worker-tab").checked = true;
             }
             if (redirectParam) {
@@ -306,7 +320,7 @@ async def handle_worker_signup(event):
     }
     
     response = await pyfetch(
-        f"{js.window.location.origin}/worker-signup",
+        f"{js.window.PRONTO_API_BASE_URL}/worker-signup",
         method="POST",
         headers={"Content-Type": "application/json"},
         body=json.dumps(payload),
@@ -356,7 +370,7 @@ async def handle_user_signup(event):
     }
     
     response = await pyfetch(
-        f"{js.window.location.origin}/signup",
+        f"{js.window.PRONTO_API_BASE_URL}/signup",
         method="POST",
         headers={"Content-Type": "application/json"},
         body=json.dumps(payload),
