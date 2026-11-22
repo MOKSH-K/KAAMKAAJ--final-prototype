@@ -359,10 +359,15 @@
                         { credentials: "include" }
                     );
 
-                    if (response.status === 401) {
-                        const destination = `booking_waiting.html?id=${encodeURIComponent(bookingId)}`;
-                        window.location.replace(`login.html?redirect=${encodeURIComponent(destination)}`);
+                    if (response.status === 401 || response.status === 403) {
                         stopped = true;
+                        window.clearTimeout(expiryTimer);
+                        window.clearInterval(pollingTimer);
+                        window.clearInterval(progressTimer);
+                        const destination = `booking_waiting.html?id=${encodeURIComponent(bookingId)}`;
+                        window.location.replace(
+                            `login.html?role=user&redirect=${encodeURIComponent(destination)}`
+                        );
                         return;
                     }
 
